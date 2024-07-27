@@ -45,8 +45,8 @@ def rasterizar_reta(x0, y0, x1, y1, resolucao):
 
 #OBS: AJEITAR ISSO DAQUI DEPOIS< AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 # Exemplo de criação de 5 segmentos de retas e 4 resoluções. 
-resolutions = [100, 200, 300, 400]
-lines = [
+resolucoes = [100, 200, 300, 400]
+retas = [
     (10, 10, 90, 90),
     (20, 10, 70, 80),
     (30, 30, 90, 10),
@@ -55,13 +55,13 @@ lines = [
 ]
 
 #pinta nas resoluções
-for resolution in resolutions:
-    plt.figure(figsize=(10, 10))
-    for i, (x0, y0, x1, y1) in enumerate(lines):
-        image = rasterizar_reta(x0, y0, x1, y1, resolution)
+for resolucao in resolucoes:
+    plt.figure(tamFigura=(50, 50))
+    for i, (x0, y0, x1, y1) in enumerate(retas):
+        image = rasterizar_reta(x0, y0, x1, y1, resolucao)
         plt.subplot(2, 3, i+1)
         plt.imshow(image, cmap='gray', vmin=0, vmax=1)
-        plt.title(f'Line {i+1}')
+        plt.title(f'Reta {i+1}')
         plt.axis('off')
-    plt.suptitle(f'Resolution: {resolution}')
+    plt.suptitle(f'resolucao: {resolucao}')
     plt.show()
