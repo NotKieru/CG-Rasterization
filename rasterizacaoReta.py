@@ -56,7 +56,7 @@ retas = [
 
 #pinta nas resoluções
 for resolucao in resolucoes:
-    plt.figure(tamFigura=(50, 50))
+    plt.figure(figsize=(50, 50))
     for i, (x0, y0, x1, y1) in enumerate(retas):
         image = rasterizar_reta(x0, y0, x1, y1, resolucao)
         plt.subplot(2, 3, i+1)
