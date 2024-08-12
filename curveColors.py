@@ -62,7 +62,7 @@ class CurvaHermite:
         plt.figure(figsize=(resolution[0] / 100, resolution[1] / 100), dpi=100)
         plt.title(f"Curva de Hermite com {num_segments} segmentos")
         plt.xlim(0, resolution[0])
-        plt.ylim(resolution[1], 0)
+        plt.ylim(0, resolution[1])
         plt.gca().set_aspect('equal', adjustable='box')
         plt.xlabel('x')
         plt.ylabel('y')
@@ -71,19 +71,24 @@ class CurvaHermite:
         for i in range(len(x) - 1):
             pontos_segmento = self.rasterizar_linha(x[i], y[i], x[i + 1], y[i + 1], num_segments)
             px, py = zip(*pontos_segmento)
-            plt.plot(px, py, marker='o', linestyle='-', color='blue')
-
+            
+            # Plotar os pontos internos
+            plt.plot(px[1:-1], py[1:-1], 'ks', markersize=2, label='Pontos Internos' if i == 0 else "")
+            # Plotar as pontas dos segmentos
+            plt.plot([px[0], px[-1]], [py[0], py[-1]], 'ro', markersize=5, label='Pontos Finais' if i == 0 else "")
+        
+        plt.legend()
         plt.show()
 
 # Pontos e tangentes para a curva de Hermite
 p1 = Ponto(0.2, 0.2)
-t1 = Ponto(0.9, 0.4)
-p2 = Ponto(-0.3, -0.4)
-t2 = Ponto(-1, -0.8)
+t1 = Ponto(0.4, 0.4)
+p2 = Ponto(0.2, 0.2)
+t2 = Ponto(-0.4, 0.4)
 
 curva = CurvaHermite(p1, t1, p2, t2)
 resolucoes = [(800, 600)]
-num_segments_list = [3, 20, 50]
+num_segments_list = [5, 20, 50]
 
 for res in resolucoes:
     for num_segments in num_segments_list:
