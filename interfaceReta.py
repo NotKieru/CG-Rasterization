@@ -32,9 +32,9 @@ class LineDrawerApp:
         self.y1_entry.grid(row=1, column=2)
         
         ttk.Label(self.control_frame, text="x0:").grid(row=0, column=0)
-        ttk.Label(self.control_frame, text="y0:").grid(row=1, column=0)
-        ttk.Label(self.control_frame, text="x1:").grid(row=0, column=3)
-        ttk.Label(self.control_frame, text="y1:").grid(row=1, column=3)
+        ttk.Label(self.control_frame, text="x1:").grid(row=1, column=0)
+        ttk.Label(self.control_frame, text=":y0").grid(row=0, column=3)
+        ttk.Label(self.control_frame, text=":y1").grid(row=1, column=3)
         
         self.add_button = ttk.Button(self.control_frame, text="Adicionar Segmento", command=self.add_segment)
         self.add_button.grid(row=2, column=0, columnspan=4, pady=5)

@@ -69,6 +69,5 @@ def plot_rasterized_image(segments, width, height, ax):
         combined_image = np.maximum(combined_image, image)
     
     ax.clear()
-    ax.imshow(combined_image, cmap='gray', origin='upper')
+    ax.imshow(combined_image, cmap='gray', origin='lower')
     ax.set_title('Imagem Rasterizada')
-    
