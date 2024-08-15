@@ -1,79 +1,146 @@
-import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.pyplot as plt
 
+class FiguraR2:
+    def __init__(self):
+        self.listaPontos = []
 
-# Código baseado no algoritmo DDA(Digital Differential Analyzer)
-def raster_line(x0, y0, x1, y1, res_width, res_height):
-    x0 = x0 + res_width
-    x1 = x1 + res_width
+    def addPonto(self, x, y):
+        if [x, y] not in self.listaPontos:
+            self.listaPontos.append([x, y])
+        else:
+            print(f"O ponto [{x},{y}] já existe na figura.")
 
-    y0 = y0 + res_height
-    y1 = y1 + res_height
+    @staticmethod
+    def normalizaPontos(pontos):
+        pontosNormalizados = []
+        for i in pontos:
+            x = 2 * i[0] - 1  # Normalização de 0 a resolucao[0] para -1 a 1
+            y = 2 * i[1] - 1  # Normalização de 0 a resolucao[1] para -1 a 1
+            pontosNormalizados.append([x, y])
+        return pontosNormalizados
 
-    res_width = res_width * 2
-    res_height = res_height * 2
+    @staticmethod
+    def convertePontos(pontos, resolucao):
+        pontosConvertidos = []
+        for i in pontos:
+            x = int((resolucao[0] * (i[0] + 1)) / 2)
+            y = int((resolucao[1] * (i[1] + 1)) / 2)
+            # Garantir que os pontos estejam dentro dos limites da imagem
+            x = min(max(x, 0), resolucao[0] - 1)
+            y = min(max(y, 0), resolucao[1] - 1)
+            pontosConvertidos.append([x, y])
+        return pontosConvertidos
 
-    imagem = np.zeros((res_width, res_height))
+    @staticmethod
+    def addPonto(x, y, lista, resolucao):
+        x_, y_ = FiguraR2.produzFrag(x, y)
+        x_ = int(min(max(x_, 0), resolucao[0] - 1))
+        y_ = int(min(max(y_, 0), resolucao[1] - 1))
+        if [x_, y_] not in lista:
+            lista.append([x_, y_])
+        return lista
 
-    # definir |Δx|, |Δy| e seus valores absolutos
-    dx = x1 - x0
-    dy = y1 - y0
-    steps = max(abs(dx), abs(dy))
+    @staticmethod
+    def produzFrag(x, y):
+        xm = int(x)
+        ym = int(y)
+        xp = xm + 0.5
+        yp = ym + 0.5
+        return xp, yp
 
-    # Verifica de a linha está na vertical
-    if dx == 0:
-        for y in range(min(int(round(y0)), int(round(y1))), max(int(round(y0)), int(round(y1)) + 1)):
-            if 0 <= int(round(x0)) < res_width and 0 <= y < res_height:
-                imagem[int(round(x0)), y] = 1
-        return imagem
+    @staticmethod
+    def rasterizacaoRetas(p1o, p2o, resolucao, passo=1):
+        p1, p2 = FiguraR2.convertePontos([p1o, p2o], resolucao)
+        listaPontos = []
+        x1, y1 = p1
+        x2, y2 = p2
+        dx = x2 - x1
+        dy = y2 - y1
 
-    # Verifica de a linha está na vertical
-    if dy == 0:
-        for x in range(min(int(round(x0)), int(round(x1))), max(int(round(x0)), int(round(x1)) + 1)):
-            if 0 <= x < res_width and 0 <= int(round(y0)) < res_height:
-                imagem[x, int(round(y0))] = 1
-        return imagem
+        if dx == 0:
+            if dy > 0:
+                while y1 <= y2:
+                    listaPontos = FiguraR2.addPonto(x1, y1, listaPontos, resolucao)
+                    y1 += passo
+            else:
+                while y1 >= y2:
+                    listaPontos = FiguraR2.addPonto(x1, y1, listaPontos, resolucao)
+                    y1 -= passo
+            return listaPontos
 
-    # Calculo dos incrementos
-    incremento_X = dx / steps
-    incremento_Y = dy / steps
+        m = dy / dx
+        b = y1 - m * x1
 
-    x = x0
-    y = y0
+        if abs(dx) > abs(dy):
+            if dx > 0:
+                while x1 <= x2:
+                    y1 = m * x1 + b
+                    listaPontos = FiguraR2.addPonto(x1, y1, listaPontos, resolucao)
+                    x1 += passo
+            else:
+                while x1 >= x2:
+                    y1 = m * x1 + b
+                    listaPontos = FiguraR2.addPonto(x1, y1, listaPontos, resolucao)
+                    x1 -= passo
+        else:
+            if dy > 0:
+                while y1 <= y2:
+                    x1 = (y1 - b) / m
+                    listaPontos = FiguraR2.addPonto(x1, y1, listaPontos, resolucao)
+                    y1 += passo
+            else:
+                while y1 >= y2:
+                    x1 = (y1 - b) / m
+                    listaPontos = FiguraR2.addPonto(x1, y1, listaPontos, resolucao)
+                    y1 -= passo
 
-    for _ in range(steps):
-        try:
-            if 0 <= int(round(x)) < res_width and 0 <= int(round(y)) < res_height:
-                imagem[int(round(x)), int(round(y))] = 1
-            x += incremento_X
-            y += incremento_Y
-        except Exception as e:
-            dummy = 0
+        return listaPontos
 
-    return imagem
+    def plotar_reta(self, p1, p2, resolucao):
+        # Normaliza os pontos para o intervalo [-1, 1]
+        p1_normalizado = FiguraR2.normalizaPontos([p1])[0]
+        p2_normalizado = FiguraR2.normalizaPontos([p2])[0]
 
+        # Converte os pontos normalizados para o sistema de coordenadas da imagem
+        p1_convertido, p2_convertido = FiguraR2.convertePontos([p1_normalizado, p2_normalizado], resolucao)
+        
+        # Rasteriza a linha entre os dois pontos
+        pontos_rasterizados = FiguraR2.rasterizacaoRetas(p1_normalizado, p2_normalizado, resolucao)
+        
+        # Se não houver pontos rasterizados, nada para plotar
+        if not pontos_rasterizados:
+            print("Nenhum ponto foi rasterizado.")
+            return
+        
+        # Cria a figura para o plot
+        plt.figure(figsize=(resolucao[0] / 100, resolucao[1] / 100), dpi=100)
+        plt.title("Plotagem de Reta")
+        plt.xlim(0, resolucao[0])
+        plt.ylim(0, resolucao[1])
+        plt.gca().set_aspect('equal', adjustable='box')
+        plt.xlabel('x')
+        plt.ylabel('y')
+        plt.grid(True)
 
-def plot_image(image, title, resolution_width, resolution_height):
-    extent = [resolution_width * -1, resolution_width, resolution_height * -1, resolution_height]
+        # Adiciona os pontos rasterizados ao gráfico
+        px, py = zip(*pontos_rasterizados)
+        plt.plot(px, py, 'k-', markersize=2, label='Reta Rasterizada')
 
-    plt.figure(figsize=(12, 12))
-    plt.imshow(image, extent=extent, origin='lower', cmap='gray', vmin=-1, vmax=1)
-    plt.xlim(resolution_width * -1, resolution_width)
+        # Adiciona os pontos finais
+        plt.plot([p1_convertido[0], p2_convertido[0]], [p1_convertido[1], p2_convertido[1]], 'ro', markersize=8, label='Pontos Finais')
 
-    x_ticks, y_ticks = [-resolution_width, 0, resolution_width], [-resolution_height, 0, resolution_height],
-    tick_labels = ["-1", "0", "1"]
+        # Adiciona uma legenda
+        plt.legend()
+        
+        # Exibe o gráfico
+        plt.show()
 
-    plt.xticks(ticks=x_ticks, labels=tick_labels)
-    plt.yticks(ticks=y_ticks, labels=tick_labels)
+# Exemplo de uso
+if __name__ == "__main__":
+    figura = FiguraR2()
+    p1 = [0, 0]
+    p2 = [10, 10]
+    resolucao = (800, 600)  # Resolução da imagem
 
-    plt.xlabel('Eixo X')
-    plt.ylabel('Eixo Y')
-
-    plt.ylim(resolution_height * -1, resolution_height)
-    plt.grid(True)
-    plt.axhline(0, color='black', linewidth=0.5)
-    plt.axvline(0, color='black', linewidth=0.5)
-    plt.title(f'{title}')
-    plt.axis('on')
-    plt.suptitle(f'resolucao: {resolution_width}x{resolution_height}')
-    plt.show()
+    figura.plotar_reta(p1, p2, resolucao)

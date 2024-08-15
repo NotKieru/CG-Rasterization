@@ -1,23 +1,51 @@
-import numpy as np
-import matplotlib.pyplot as plt
 from src.Lines import raster_line, plot_image
-from src.Polygons import combine_matrices, scanline_fill
-from src.hermiteCurve import Ponto, CurvaHermite
+from src.Polygons import combine_matrices
 
-def handle_line_event(resolution, x0, y0, x1, y1):
-    image = raster_line(x0, y0, x1, y1, resolution[0] // 2, resolution[1] // 2)
-    plot_image(image, 'Reta', resolution[0] // 2, resolution[1] // 2)
+def draw_line(resolution, coordinates):
+    resolution_width, resolution_height = (
+        int(resolution.split("x")[0]), int(resolution.split("x")[1]))
 
-def handle_polygon_event(resolution, points):
-    points = [(points[i], points[i + 1]) for i in range(0, len(points), 2)]
-    matrices = [raster_line(p1[0], p1[1], p2[0], p2[1], resolution[0] // 2, resolution[1] // 2)
-                for p1, p2 in zip(points[:-1], points[1:])]
-    combined = combine_matrices(matrices)
-    filled_polygon = scanline_fill(combined)
-    plot_image(filled_polygon, 'Polígono', resolution[0] // 2, resolution[1] // 2)
+    first_point_coordinates, second_point_coordinates = (
+        coordinates[0].split(" "), coordinates[1].split(" "))
 
-def handle_curve_event(resolution, points, num_segments):
-    pontos = [Ponto(points[i], points[i + 1]) for i in range(0, len(points), 2)]
-    tangentes = [Ponto(0, 0) for _ in pontos]  # Exemplo simples: tangentes nulas
-    curva = CurvaHermite(pontos, tangentes)
-    curva.plotar_curva(num_segments, resolution)
+    return raster_line(
+        x0=int(float(first_point_coordinates[0]) * resolution_width),
+        y0=int(float(first_point_coordinates[1]) * resolution_height),
+        x1=int(float(second_point_coordinates[0]) * resolution_width),
+        y1=int(float(second_point_coordinates[1]) * resolution_height),
+        res_width=resolution_width,
+        res_height=resolution_height,
+    )
+
+def draw_polygon(resolution, coordinates):
+    images_list = []
+    resolution_width, resolution_height = (
+        int(resolution.split("x")[0]), int(resolution.split("x")[1]))
+
+    for index in range(len(coordinates) - 1):
+        first_point_coordinates, second_point_coordinates = (
+            coordinates[index].split(" "), coordinates[index + 1].split(" "))
+
+        images_list.append(raster_line(
+            x0=int(float(first_point_coordinates[0]) * resolution_width),
+            y0=int(float(first_point_coordinates[1]) * resolution_height),
+            x1=int(float(second_point_coordinates[0]) * resolution_width),
+            y1=int(float(second_point_coordinates[1]) * resolution_height),
+            res_width=resolution_width,
+            res_height=resolution_height,
+        ))
+
+    last_index = len(coordinates) - 1
+    first_point_coordinates, second_point_coordinates = (
+        coordinates[last_index].split(" "), coordinates[0].split(" "))
+
+    images_list.append(raster_line(
+        x0=int(float(first_point_coordinates[0]) * resolution_width),
+        y0=int(float(first_point_coordinates[1]) * resolution_height),
+        x1=int(float(second_point_coordinates[0]) * resolution_width),
+        y1=int(float(second_point_coordinates[1]) * resolution_height),
+        res_width=resolution_width,
+        res_height=resolution_height,
+    ))
+
+    return images_list
