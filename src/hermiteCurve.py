@@ -8,8 +8,8 @@ class Ponto:
 
 class CurvaHermite:
     def __init__(self, pontos, tangentes):
-        self.pontos = pontos  # Lista de pontos
-        self.tangentes = tangentes  # Lista de tangentes
+        self.pontos = pontos
+        self.tangentes = tangentes
 
     def calcular_curva(self, num_points, p1, t1, p2, t2):
         t = np.linspace(0, 1, num_points)
@@ -34,7 +34,7 @@ class CurvaHermite:
 
         dx = x2 - x1
         dy = y2 - y1
-        passos = int(max(abs(dx), abs(dy)))  # Converter para inteiro
+        passos = int(max(abs(dx), abs(dy)))
 
         if passos == 0:
             return [(x1, y1)]
@@ -80,13 +80,15 @@ class CurvaHermite:
         plt.show()
 
 # Exemplo de uso com 3 pontos
-pontos = [Ponto(0.2, 0.2), Ponto(-0.3, -0.4), Ponto(0.4, -0.2)]
-tangentes = [Ponto(0.9, 0.4), Ponto(-1, -0.8), Ponto(0.3, 0.5)]
+# Código é apenas para testes
+# if __name__ == '__main__':
+#     pontos = [Ponto(0.2, 0.2), Ponto(-0.3, -0.4), Ponto(0.4, -0.2)]
+#     tangentes = [Ponto(0.9, 0.4), Ponto(-1, -0.8), Ponto(0.3, 0.5)]
 
-curva = CurvaHermite(pontos, tangentes)
-resolucoes = [(800, 600)]
-num_segments_list = [5, 20, 50]
+#     curva = CurvaHermite(pontos, tangentes)
+#     resolucoes = [(800, 600)]
+#     num_segments_list = [5, 20, 50]
 
-for res in resolucoes:
-    for num_segments in num_segments_list:
-        curva.plotar_curva(num_segments, res)
+#     for res in resolucoes:
+#         for num_segments in num_segments_list:
+#             curva.plotar_curva(num_segments, res)
