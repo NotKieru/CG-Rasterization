@@ -10,6 +10,9 @@ def normalize_point(x, y, x_min, x_max, y_min, y_max):
     return x_normalized, y_normalized
 
 def rasterize_line(x0, y0, x1, y1, width, height):
+    """
+    Rasteriza uma linha entre (x0, y0) e (x1, y1) em uma imagem de resolução (width, height).
+    """
     # Normalizar os pontos para o intervalo [-1, 1]
     x0, y0 = normalize_point(x0, y0, -1, 1, -1, 1)
     x1, y1 = normalize_point(x1, y1, -1, 1, -1, 1)
@@ -29,6 +32,12 @@ def rasterize_line(x0, y0, x1, y1, width, height):
     
     # Verificar o comprimento da reta
     steps = max(abs(dx), abs(dy))
+    
+    if steps == 0:
+        # Caso trivial onde os dois pontos são o mesmo
+        if 0 <= x0 < width and 0 <= y0 < height:
+            image[y0, x0] = 1
+        return image
     
     # Garantir que steps seja um número inteiro
     steps = int(steps)
@@ -74,11 +83,18 @@ def plot_lines(segments, width, height):
 
 # Definir os segmentos de reta
 segments = [
-    ((-0.8, -0.8), (0.8, 0.8)),  # |Δx| > |Δy|
-    ((-0.8, 0.2), (0.2, 0.8)),   # |Δy| > |Δx|
-    ((-0.9, -0.4), (0.9, 0.4)),   # |Δx| > |Δy|
-    ((-0.5, -0.9), (0.5, 0.9)),   # |Δy| > |Δx|
-    ((-0.9, 0.1), (0.4, -0.8))    # |Δx| > |Δy|
+    # Segmentos com inclinação positiva (crescendo)
+    ((-0.8, -0.8), (0.8, 0.8)),  # |Δx| > |Δy|, m > 0
+    ((-0.9, -0.4), (0.9, 0.4)),  # |Δx| > |Δy|, m > 0
+    
+    # Segmentos com inclinação negativa (decrescendo)
+    ((-0.8, 0.2), (0.2, 0.8)),   # |Δy| > |Δx|, m < 0
+    ((-0.5, -0.9), (0.5, 0.9)),   # |Δy| > |Δx|, m < 0
+    
+    # Segmentos horizontais e verticais
+    ((-0.9, 0.1), (0.4, -0.8)),   # |Δx| > |Δy|, m < 0
+    ((-0.5, 0.0), (0.5, 0.0)),    # Horizontal
+    ((0.0, -0.5), (0.0, 0.5))     # Vertical
 ]
 
 # Definir a resolução da imagem
