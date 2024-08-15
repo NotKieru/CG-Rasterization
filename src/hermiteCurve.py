@@ -27,9 +27,17 @@ class CurvaHermite:
         x_min, x_max = np.min(x), np.max(x)
         y_min, y_max = np.min(y), np.max(y)
         
-        # Normalização para o intervalo [-1, 1]
-        x = 2 * (x - x_min) / (x_max - x_min) - 1
-        y = 2 * (y - y_min) / (y_max - y_min) - 1
+        # Verifique se o intervalo é zero e evite a divisão por zero
+        if x_max == x_min:
+            x = np.zeros_like(x)  # Ou algum outro valor apropriado
+        else:
+            # Normalização para o intervalo [-1, 1]
+            x = 2 * (x - x_min) / (x_max - x_min) - 1
+        
+        if y_max == y_min:
+            y = np.zeros_like(y)  # Ou algum outro valor apropriado
+        else:
+            y = 2 * (y - y_min) / (y_max - y_min) - 1
         
         return x, y
 
@@ -63,7 +71,11 @@ class CurvaHermite:
         return pontos
 
     def plotar_curva(self, num_segments, resolution):
-        num_points = num_segments + 1  # Número de pontos na curva
+        num_points = num_segments * 10 + 1  # Aumentar a densidade dos pontos para melhor visualização
+
+        if len(self.pontos) < 2:
+            print("Número insuficiente de pontos para gerar a curva.")
+            return
 
         plt.figure(figsize=(resolution[0] / 100, resolution[1] / 100), dpi=100)
         plt.title(f"Curva de Hermite com {num_segments} segmentos")
@@ -75,30 +87,33 @@ class CurvaHermite:
         plt.grid(True)
 
         for i in range(len(self.pontos) - 1):
+            # Calcula a curva para o segmento atual
             x, y = self.calcular_curva(num_points, self.pontos[i], self.tangentes[i], self.pontos[i + 1], self.tangentes[i + 1])
             x, y = self.normalizar_coordenadas(x, y)
             x, y = self.escalonar_para_resolucao(x, y, resolution)
 
+            # Rasteriza os segmentos de reta
             for j in range(len(x) - 1):
                 pontos_segmento = self.rasterizar_linha(x[j], y[j], x[j + 1], y[j + 1])
                 px, py = zip(*pontos_segmento)
                 
-                plt.plot(px[1:-1], py[1:-1], 'ks', markersize=2, label='Pontos Internos' if j == 0 and i == 0 else "")
-                plt.plot([px[0], px[-1]], [py[0], py[-1]], 'ro', markersize=5, label='Pontos Finais' if j == 0 and i == 0 else "")
-        
+                plt.plot(px, py, 'k-', lw=1, label='Segmento de Reta' if i == 0 and j == 0 else "")
+
+            # Marcando os pontos finais
+            # plt.plot(self.pontos[i].x, self.pontos[i].y, 'ro', markersize=8, label='Pontos Finais' if i == 0 else "")
+            # plt.plot(self.pontos[i + 1].x, self.pontos[i + 1].y, 'ro', markersize=8, label='Pontos Finais' if i == 0 else "")
+
         plt.legend()
         plt.show()
 
-
 # Exemplo de uso com 3 pontos
-# Código é apenas para testes
 # if __name__ == '__main__':
 #     pontos = [Ponto(0.2, 0.2), Ponto(-0.3, -0.4), Ponto(0.4, -0.2)]
 #     tangentes = [Ponto(0.9, 0.4), Ponto(-1, -0.8), Ponto(0.3, 0.5)]
 
 #     curva = CurvaHermite(pontos, tangentes)
 #     resolucoes = [(800, 600)]
-#     num_segments_list = [5, 20, 50]
+#     num_segments_list = [1, 2, 5, 20, 50]
 
 #     for res in resolucoes:
 #         for num_segments in num_segments_list:

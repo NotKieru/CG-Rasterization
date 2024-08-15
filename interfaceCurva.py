@@ -84,7 +84,7 @@ class Interface:
             resolution = tuple(map(int, resolution_str.split("x")))
 
             curva = CurvaHermite(pontos, tangentes)
-            curva.plotar_curva(num_segments=10, resolution=resolution)
+            curva.plotar_curva(num_segments=3, resolution=resolution)
         except ValueError as e:
             messagebox.showerror("Erro", f"Dados inválidos: {e}")
 
