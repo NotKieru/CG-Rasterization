@@ -23,7 +23,17 @@ class CurvaHermite:
 
         return x, y
 
-    def normalizar_coordenadas(self, x, y, resolution):
+    def normalizar_coordenadas(self, x, y):
+        x_min, x_max = np.min(x), np.max(x)
+        y_min, y_max = np.min(y), np.max(y)
+        
+        # Normalização para o intervalo [-1, 1]
+        x = 2 * (x - x_min) / (x_max - x_min) - 1
+        y = 2 * (y - y_min) / (y_max - y_min) - 1
+        
+        return x, y
+
+    def escalonar_para_resolucao(self, x, y, resolution):
         width, height = resolution
         x = (x + 1) / 2 * width
         y = (y + 1) / 2 * height
@@ -54,7 +64,7 @@ class CurvaHermite:
 
     def plotar_curva(self, num_segments, resolution):
         num_points = num_segments + 1  # Número de pontos na curva
-        
+
         plt.figure(figsize=(resolution[0] / 100, resolution[1] / 100), dpi=100)
         plt.title(f"Curva de Hermite com {num_segments} segmentos")
         plt.xlim(0, resolution[0])
@@ -64,10 +74,10 @@ class CurvaHermite:
         plt.ylabel('y')
         plt.grid(True)
 
-        # Percorre os pares de pontos consecutivos
         for i in range(len(self.pontos) - 1):
             x, y = self.calcular_curva(num_points, self.pontos[i], self.tangentes[i], self.pontos[i + 1], self.tangentes[i + 1])
-            x, y = self.normalizar_coordenadas(x, y, resolution)
+            x, y = self.normalizar_coordenadas(x, y)
+            x, y = self.escalonar_para_resolucao(x, y, resolution)
 
             for j in range(len(x) - 1):
                 pontos_segmento = self.rasterizar_linha(x[j], y[j], x[j + 1], y[j + 1])
@@ -78,6 +88,7 @@ class CurvaHermite:
         
         plt.legend()
         plt.show()
+
 
 # Exemplo de uso com 3 pontos
 # Código é apenas para testes

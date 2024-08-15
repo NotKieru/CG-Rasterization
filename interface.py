@@ -1,95 +1,102 @@
-import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QInputDialog, QMessageBox, QLabel, QLineEdit, QFormLayout
+import tkinter as tk
+from tkinter import ttk, messagebox
+from test import Ponto, CurvaHermite
 
-class RasterApp(QWidget):
-    def __init__(self):
-        super().__init__()
+class Interface:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Curva de Hermite")
 
-        self.initUI()
+        self.pontos = []
+        self.tangentes = []
 
-    def initUI(self):
-        self.setWindowTitle('Rasterização')
-        self.setGeometry(100, 100, 300, 200)  # Tamanho padrão da janela
+        self.create_widgets()
 
-        layout = QVBoxLayout()
+    def create_widgets(self):
+        # Layout de entrada para pontos e tangentes
+        self.ponto_frame = tk.LabelFrame(self.root, text="Pontos e Tangentes", padx=10, pady=10)
+        self.ponto_frame.grid(row=0, column=0, padx=10, pady=10)
 
-        # Botões
-        self.btn_line = QPushButton('Reta', self)
-        self.btn_line.clicked.connect(self.draw_line)
-        layout.addWidget(self.btn_line)
+        self.pontos_entries = []
+        self.tangentes_entries = []
+        
+        self.add_entry_row()
 
-        self.btn_polygon = QPushButton('Polígono', self)
-        self.btn_polygon.clicked.connect(self.draw_polygon)
-        layout.addWidget(self.btn_polygon)
+        tk.Button(self.root, text="Adicionar Ponto/Tangente", command=self.add_entry_row).grid(row=1, column=0, pady=5)
 
-        self.btn_curve = QPushButton('Curva', self)
-        self.btn_curve.clicked.connect(self.draw_curve)
-        layout.addWidget(self.btn_curve)
+        # Resolução
+        tk.Label(self.root, text="Resolução").grid(row=2, column=0, padx=10, pady=5)
+        self.resolution_var = tk.StringVar(value="800x600")
+        resolutions = ["100x100", "300x300", "800x600", "1920x1080"]
+        resolution_menu = ttk.Combobox(self.root, textvariable=self.resolution_var, values=resolutions)
+        resolution_menu.grid(row=2, column=1, padx=5, pady=5)
 
-        # Área para entrada de pontos e número de segmentos
-        self.point_inputs = QFormLayout()
-        self.points_label = QLabel("Pontos (x1,y1 x2,y2 ...):")
-        self.point_input = QLineEdit()
-        self.point_inputs.addRow(self.points_label, self.point_input)
+        # Botão de Plotar
+        tk.Button(self.root, text="Plotar Curva", command=self.plotar_curva).grid(row=3, column=0, columnspan=2, pady=10)
 
-        self.segments_label = QLabel("Número de segmentos:")
-        self.segments_input = QLineEdit()
-        self.point_inputs.addRow(self.segments_label, self.segments_input)
+    def add_entry_row(self):
+        if len(self.pontos_entries) < 3:  # Garantir no mínimo 3 entradas
+            for i in range(3 - len(self.pontos_entries)):
+                # Adicionar linhas de entrada para pontos
+                x_entry = tk.Entry(self.ponto_frame, width=10)
+                y_entry = tk.Entry(self.ponto_frame, width=10)
+                tk.Label(self.ponto_frame, text=f"Ponto {len(self.pontos_entries) + 1} (x, y)").grid(row=len(self.pontos_entries), column=0, padx=5, pady=5)
+                x_entry.grid(row=len(self.pontos_entries), column=1, padx=5, pady=5)
+                y_entry.grid(row=len(self.pontos_entries), column=2, padx=5, pady=5)
+                self.pontos_entries.append((x_entry, y_entry))
 
-        self.segment_inputs_area = QWidget()
-        self.segment_inputs_area.setLayout(self.point_inputs)
-        layout.addWidget(self.segment_inputs_area)
+                # Adicionar linhas de entrada para tangentes
+                x_entry_t = tk.Entry(self.ponto_frame, width=10)
+                y_entry_t = tk.Entry(self.ponto_frame, width=10)
+                if len(self.pontos_entries) > 0:
+                    tk.Label(self.ponto_frame, text=f"Tangente {len(self.pontos_entries)} (x, y)").grid(row=len(self.pontos_entries)-1, column=3, padx=5, pady=5)
+                    x_entry_t.grid(row=len(self.pontos_entries)-1, column=4, padx=5, pady=5)
+                    y_entry_t.grid(row=len(self.pontos_entries)-1, column=5, padx=5, pady=5)
+                    self.tangentes_entries.append((x_entry_t, y_entry_t))
 
-        self.setLayout(layout)
-        self.show()
+    def validar_entrada(self):
+        pontos = []
+        tangentes = []
 
-    def select_resolution(self):
-        items = ("100x100", "300x300", "800x600", "1920x1080")
-        item, ok = QInputDialog.getItem(self, "Selecione a Resolução", "Resolução:", items, 2, False)
-        if ok and item:
-            return tuple(map(int, item.split('x')))
-        return None
+        try:
+            for (x_entry, y_entry) in self.pontos_entries:
+                x = x_entry.get().strip()
+                y = y_entry.get().strip()
+                if x and y:
+                    pontos.append(Ponto(float(x), float(y)))
 
-    def draw_line(self):
-        resolution = self.select_resolution()
-        if resolution:
-            points_text, ok = QInputDialog.getText(self, 'Entrada de Pontos', 'Digite os pontos (x0,y0 x1,y1):')
-            if ok:
-                points = list(map(int, points_text.replace(' ', '').replace(',', ' ').split()))
-                if len(points) == 4:
-                    from src.events import handle_line_event
-                    handle_line_event(resolution, *points)
-                else:
-                    QMessageBox.warning(self, 'Erro', 'Número de pontos inválido. Deve ser 4 (x0, y0, x1, y1).')
+            for (x_entry, y_entry) in self.tangentes_entries:
+                x = x_entry.get().strip()
+                y = y_entry.get().strip()
+                if x and y:
+                    tangentes.append(Ponto(float(x), float(y)))
 
-    def draw_polygon(self):
-        resolution = self.select_resolution()
-        if resolution:
-            points_text, ok = QInputDialog.getText(self, 'Entrada de Pontos', 'Digite os pontos (x1,y1 x2,y2 ...):')
-            if ok:
-                points = list(map(int, points_text.replace(' ', '').replace(',', ' ').split()))
-                if len(points) % 2 == 0:
-                    from src.events import handle_polygon_event
-                    handle_polygon_event(resolution, points)
-                else:
-                    QMessageBox.warning(self, 'Erro', 'Número de pontos inválido. Deve ser par.')
+            if len(pontos) < 3 or len(tangentes) < 2:
+                raise ValueError("Você deve inserir pelo menos 3 pontos e 2 tangentes.")
+                
+            if len(pontos) != len(tangentes) + 1:
+                raise ValueError("O número de pontos deve ser um a mais que o número de tangentes.")
 
-    def draw_curve(self):
-        resolution = self.select_resolution()
-        if resolution:
-            points_text, ok = QInputDialog.getText(self, 'Entrada de Pontos', 'Digite os pontos (x1,y1 x2,y2 ...):')
-            if ok:
-                points = list(map(int, points_text.replace(' ', '').replace(',', ' ').split()))
-                segments_text, ok = QInputDialog.getText(self, 'Número de Segmentos', 'Digite o número de segmentos:')
-                if ok:
-                    num_segments = int(segments_text)
-                    if len(points) % 4 == 0 and num_segments > 0:
-                        from src.events import handle_curve_event
-                        handle_curve_event(resolution, points, num_segments)
-                    else:
-                        QMessageBox.warning(self, 'Erro', 'Número de pontos inválido ou número de segmentos inválido.')
-                        
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    ex = RasterApp()
-    sys.exit(app.exec_())
+            return pontos, tangentes
+        except ValueError as e:
+            messagebox.showerror("Erro", f"Dados inválidos: {e}")
+            return None, None
+
+    def plotar_curva(self):
+        pontos, tangentes = self.validar_entrada()
+        if pontos is None or tangentes is None:
+            return
+
+        try:
+            resolution_str = self.resolution_var.get()
+            resolution = tuple(map(int, resolution_str.split("x")))
+
+            curva = CurvaHermite(pontos, tangentes)
+            curva.plotar_curva(num_segments=10, resolution=resolution)
+        except ValueError as e:
+            messagebox.showerror("Erro", f"Dados inválidos: {e}")
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = Interface(root)
+    root.mainloop()

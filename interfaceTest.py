@@ -35,8 +35,8 @@ class Interface:
         tk.Button(self.root, text="Plotar Curva", command=self.plotar_curva).grid(row=3, column=0, columnspan=2, pady=10)
 
     def add_entry_row(self):
-        if len(self.pontos_entries) < 3:  # Garantir no mínimo 3 entradas
-            for i in range(3 - len(self.pontos_entries)):
+        if len(self.pontos_entries) < 2:  # Garantir no mínimo 3 entradas
+            for i in range(2 - len(self.pontos_entries)):
                 # Adicionar linhas de entrada para pontos
                 x_entry = tk.Entry(self.ponto_frame, width=10)
                 y_entry = tk.Entry(self.ponto_frame, width=10)
@@ -71,7 +71,7 @@ class Interface:
                 if x and y:
                     tangentes.append(Ponto(float(x), float(y)))
 
-            if len(pontos) < 3 or len(tangentes) < 2:
+            if len(pontos) < 2 or len(tangentes) < 2:
                 raise ValueError("Você deve inserir pelo menos 3 pontos e 2 tangentes.")
         
 
