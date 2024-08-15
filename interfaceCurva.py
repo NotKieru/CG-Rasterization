@@ -68,8 +68,6 @@ class Interface:
                 if x and y:
                     tangentes.append(Ponto(float(x), float(y)))
 
-            if len(pontos) < 3:
-                raise ValueError("Você deve inserir pelo menos 3 pontos")
 
             return pontos, tangentes
         except ValueError as e:
