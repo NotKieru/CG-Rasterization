@@ -1,141 +1,90 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from tkinter.simpledialog import askstring
-from tkinter import *
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-def calculator_difference(p1, p2):
-    dx = p1[0] - p2[0]
-    dy = p1[1] - p2[1]
-    return dx, dy
-def calculator_mb(p1, dx, dy):
-    m = None if dx == 0 else dy / dx
-    b = None if m is None else p1[1] - m * p1[0]
-    return m, b
 
-def calculator_x_points(p1, p2, m, b):
-    x1, y1 = p1
-    x2, y2 = p2
-    points = []
+class Ponto:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
 
-    if x1 > x2:
-        x1, x2 = x2, x1
-    while x1 <= x2:
-        y = m * x1 + b if m is not None else y1
-        points.append((x1, round(y)))
-        x1 += 1
+class CurvaHermite:
+    def __init__(self, pontos, tangentes):
+        self.pontos = pontos
+        self.tangentes = tangentes
 
-    return points
+    def calcular_curva(self, num_points, p1, t1, p2, t2):
+        t = np.linspace(0, 1, num_points)
+        h00 = 2*t**3 - 3*t**2 + 1
+        h01 = -2*t**3 + 3*t**2
+        h10 = t**3 - 2*t**2 + t
+        h11 = t**3 - t**2
 
-def calculator_y_points(p1, p2, m, b):
-    x1, y1 = p1
-    x2, y2 = p2
-    points = []
-    if y1 > y2:
-        y1, y2 = y2, y1
-    while y1 <= y2:
-        x = (y1 - b) / m if m is not None else x1
-        points.append((round(x), y1))
-        y1 += 1
+        x = h00*p1.x + h01*p2.x + h10*t1.x + h11*t2.x
+        y = h00*p1.y + h01*p2.y + h10*t1.y + h11*t2.y
 
-    return points
+        return x, y
 
-def mid_point(p1, p2):
-    p1, p2 = p1, p2
-    if p1[0] > p2[0] or p1[1] > p2[1]:
-        p1, p2 = p2, p1
+    def normalizar_coordenadas(self, x, y):
+        x_min, x_max = np.min(x), np.max(x)
+        y_min, y_max = np.min(y), np.max(y)
+        
+        # Normalização para o intervalo [-1, 1]
+        x = 2 * (x - x_min) / (x_max - x_min) - 1
+        y = 2 * (y - y_min) / (y_max - y_min) - 1
+        
+        return x, y
 
-    dx, dy = calculator_difference(p1, p2)
-    m, b = calculator_mb(p1, dx, dy)
+    def escalonar_para_resolucao(self, x, y, resolution):
+        width, height = resolution
+        x = (x + 1) / 2 * width
+        y = (y + 1) / 2 * height
+        return x, y
 
-    points = []
+    def rasterizar_linha(self, x1, y1, x2, y2):
+        pontos = []
 
-    if abs(dx) >= abs(dy):
-        points += calculator_x_points(p1, p2, m, b)
-    else:
-        points += calculator_y_points(p1, p2, m, b)
+        dx = x2 - x1
+        dy = y2 - y1
+        passos = int(max(abs(dx), abs(dy)))
 
-    return points
+        if passos == 0:
+            return [(x1, y1)]
 
-def curvaHermite(P0, T0, P1, T1, numeroDePontos):
-    pontos = []
+        x_inc = dx / passos
+        y_inc = dy / passos
 
-    for t in np.linspace(0, 1, numeroDePontos):
-        H1 = 2*t*3 - 3*t*2 + 1 # P0
-        H2 = t*3 - 2*t*2 + t # T0
-        H3 = -2*t*3 + 3*t*2 # P1
-        H4 = t*3 - t*2 # T1
+        x = x1
+        y = y1
 
-        x = H1 * P0[0] + H2 * T0[0] + H3 * P1[0] + H4 * T1[0]
-        y = H1 * P0[1] + H2 * T0[1] + H3 * P1[1] + H4 * T1[1]
-        x_round = round(x)
-        y_round = round(y)
-        pontos.append((x_round, y_round))
+        for _ in range(passos + 1):
+            pontos.append((round(x), round(y)))
+            x += x_inc
+            y += y_inc
 
-    return pontos
+        return pontos
 
-def plot_points(points, size_view, window):
-  img = np.ones((size_view, size_view))
-  for i in points:
-    img[i[0]][i[1]] = 0
+    def plotar_curva(self, num_segments, resolution):
+        num_points = num_segments + 1  # Número de pontos na curva
 
-  plt.clf()
-  fig, ax = plt.subplots(figsize=(8, 8))
-  ax.imshow(img, cmap='gray', origin='lower', vmin=0, vmax=1)
+        plt.figure(figsize=(resolution[0] / 100, resolution[1] / 100), dpi=100)
+        plt.title(f"Curva de Hermite com {num_segments} segmentos")
+        plt.xlim(0, resolution[0])
+        plt.ylim(0, resolution[1])
+        plt.gca().set_aspect('equal', adjustable='box')
+        plt.xlabel('x')
+        plt.ylabel('y')
+        plt.grid(True)
 
-  if not hasattr(window, 'canvas'):
-      window.canvas = FigureCanvasTkAgg(fig, master=window)
-      window.canvas.get_tk_widget().pack()
-  else:
-      window.canvas.figure = fig
-      window.canvas.draw()
+        for i in range(len(self.pontos) - 1):
+            x, y = self.calcular_curva(num_points, self.pontos[i], self.tangentes[i], self.pontos[i + 1], self.tangentes[i + 1])
+            x, y = self.normalizar_coordenadas(x, y)
+            x, y = self.escalonar_para_resolucao(x, y, resolution)
 
-
-def nossa(window):
-    #p1 = (int(x1_entry.get()), int(y1_entry.get()))
-    #p2 = (int(x2_entry.get()), int(y2_entry.get()))
-
-
-    points = curvaHermite((20,20),(40,40), (20,20), (-40,40), 20)
-
-    plot_points(points, 50, window)
-def view():
-    window = Tk()
-    window.title('Trabalho de CG')
-    window.geometry("800x600")
-
-    # Frame para o botão
-    control_frame = Frame(window)
-    control_frame.pack(side=RIGHT, fill=Y, padx=10, pady=10)
-
-    x1_point = Label(control_frame,text='Ponto 1 - X')
-    x1_point.pack(pady=5)
-    global x1_entry
-    x1_entry = Entry(control_frame)
-    x1_entry.pack(pady=5)
-
-    y1_point = Label(control_frame,text='Ponto 1 - Y')
-    y1_point.pack(pady=5)
-    global y1_entry
-    y1_entry = Entry(control_frame)
-    y1_entry.pack(pady=5)
-
-    x2_point = Label(control_frame,text='Ponto 2 - Y')
-    x2_point.pack(pady=5)
-    global x2_entry
-    x2_entry = Entry(control_frame)
-    x2_entry.pack(pady=5)
-
-    y2_point = Label(control_frame,text='Ponto 2 - Y')
-    y2_point.pack(pady=5)
-    global y2_entry
-    y2_entry = Entry(control_frame)
-    y2_entry.pack(pady=5)
-
-    # Botão para plotar o gráfico
-    plot_button = Button(master=control_frame, command=lambda: nossa(window),
-                            height=2, width=10, text="Plot")
-    plot_button.pack(pady=20)
-
-    window.mainloop()
-
-view()
+            for j in range(len(x) - 1):
+                pontos_segmento = self.rasterizar_linha(x[j], y[j], x[j + 1], y[j + 1])
+                px, py = zip(*pontos_segmento)
+                
+                plt.plot(px[1:-1], py[1:-1], 'ks', markersize=2, label='Pontos Internos' if j == 0 and i == 0 else "")
+                plt.plot([px[0], px[-1]], [py[0], py[-1]], 'ro', markersize=5, label='Pontos Finais' if j == 0 and i == 0 else "")
+        
+        plt.legend()
+        plt.show()
