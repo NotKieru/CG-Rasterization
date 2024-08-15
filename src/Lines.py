@@ -9,14 +9,6 @@ def normalize_point(x, y, x_min, x_max, y_min, y_max):
     y_normalized = 2 * (y - y_min) / (y_max - y_min) - 1
     return x_normalized, y_normalized
 
-def denormalize_point(x, y, x_min, x_max, y_min, y_max):
-    """
-    Desnormaliza um ponto (x, y) do intervalo [-1, 1] para os intervalos fornecidos.
-    """
-    x_denormalized = (x + 1) * (x_max - x_min) / 2 + x_min
-    y_denormalized = (y + 1) * (y_max - y_min) / 2 + y_min
-    return x_denormalized, y_denormalized
-
 def rasterize_line(x0, y0, x1, y1, width, height):
     # Normalizar os pontos para o intervalo [-1, 1]
     x0, y0 = normalize_point(x0, y0, -1, 1, -1, 1)
@@ -58,24 +50,40 @@ def rasterize_line(x0, y0, x1, y1, width, height):
     
     return image
 
-# Definir os pontos de início e fim da reta no intervalo [-1, 1]
-x0, y0 = -0.5, -0.5
-x1, y1 = 0.5, 0.5
+def plot_lines(segments, width, height):
+    """
+    Plota múltiplos segmentos de reta em uma única imagem.
+    
+    Parameters:
+    - segments: Lista de tuplas ((x0, y0), (x1, y1)) para cada segmento de reta.
+    - width: Largura da imagem em pixels.
+    - height: Altura da imagem em pixels.
+    """
+    # Criar uma imagem em branco
+    combined_image = np.zeros((height, width), dtype=np.uint8)
+    
+    # Rasterizar cada segmento de reta
+    for (x0, y0), (x1, y1) in segments:
+        image = rasterize_line(x0, y0, x1, y1, width, height)
+        combined_image = np.maximum(combined_image, image)
+    
+    # Mostrar a imagem
+    plt.imshow(combined_image, cmap='gray', origin='upper')
+    plt.title('Rasterização de Segmentos de Reta')
+    plt.show()
+
+# Definir os segmentos de reta
+segments = [
+    ((-0.8, -0.8), (0.8, 0.8)),  # |Δx| > |Δy|
+    ((-0.8, 0.2), (0.2, 0.8)),   # |Δy| > |Δx|
+    ((-0.9, -0.4), (0.9, 0.4)),   # |Δx| > |Δy|
+    ((-0.5, -0.9), (0.5, 0.9)),   # |Δy| > |Δx|
+    ((-0.9, 0.1), (0.4, -0.8))    # |Δx| > |Δy|
+]
 
 # Definir a resolução da imagem
 width = 100
 height = 100
 
-# Rasterizar a reta
-image = rasterize_line(x0, y0, x1, y1, width, height)
-
-# Mostrar a imagem
-plt.imshow(image, cmap='gray', origin='upper')
-plt.title('Rasterização de Segmento de Reta em Imagem 100x100')
-# plt.xlim(0, resolution[0])
-# plt.ylim(0, resolution[1])
-plt.gca().set_aspect('equal', adjustable='box')
-plt.xlabel('x')
-plt.ylabel('y')
-plt.grid(True)
-plt.show()
+# Plotar os segmentos de reta
+plot_lines(segments, width, height)
