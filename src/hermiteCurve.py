@@ -8,18 +8,20 @@ class Ponto:
 
 class CurvaHermite:
     def __init__(self, pontos, tangentes):
+        if len(pontos) != len(tangentes):
+            raise ValueError("O número de pontos deve ser igual ao número de tangentes.")
         self.pontos = pontos
         self.tangentes = tangentes
 
     def calcular_curva(self, num_points, p1, t1, p2, t2):
         t = np.linspace(0, 1, num_points)
-        h00 = 2*t**3 - 3*t**2 + 1
-        h01 = -2*t**3 + 3*t**2
-        h10 = t**3 - 2*t**2 + t
+        h00 = 2 * t**3 - 3 * t**2 + 1
+        h01 = -2 * t**3 + 3 * t**2
+        h10 = t**3 - 2 * t**2 + t
         h11 = t**3 - t**2
 
-        x = h00*p1.x + h01*p2.x + h10*t1.x + h11*t2.x
-        y = h00*p1.y + h01*p2.y + h10*t1.y + h11*t2.y
+        x = h00 * p1.x + h01 * p2.x + h10 * t1.x + h11 * t2.x
+        y = h00 * p1.y + h01 * p2.y + h10 * t1.y + h11 * t2.y
 
         return x, y
 
@@ -27,18 +29,17 @@ class CurvaHermite:
         x_min, x_max = np.min(x), np.max(x)
         y_min, y_max = np.min(y), np.max(y)
         
-        # Verifique se o intervalo é zero e evite a divisão por zero
-        if x_max == x_min:
-            x = np.zeros_like(x)  # Ou algum outro valor apropriado
-        else:
-            # Normalização para o intervalo [-1, 1]
-            x = 2 * (x - x_min) / (x_max - x_min) - 1
-        
-        if y_max == y_min:
-            y = np.zeros_like(y)  # Ou algum outro valor apropriado
-        else:
-            y = 2 * (y - y_min) / (y_max - y_min) - 1
-        
+        # Normalização para o intervalo [-1, 1]
+        x_range = x_max - x_min
+        y_range = y_max - y_min
+
+        # Evita divisão por zero
+        x_range = x_range if x_range != 0 else 1
+        y_range = y_range if y_range != 0 else 1
+
+        x = 2 * (x - x_min) / x_range - 1
+        y = 2 * (y - y_min) / y_range - 1
+
         return x, y
 
     def escalonar_para_resolucao(self, x, y, resolution):
@@ -49,7 +50,6 @@ class CurvaHermite:
 
     def rasterizar_linha(self, x1, y1, x2, y2):
         pontos = []
-
         dx = x2 - x1
         dy = y2 - y1
         passos = int(max(abs(dx), abs(dy)))
@@ -70,51 +70,65 @@ class CurvaHermite:
 
         return pontos
 
-    def plotar_curva(self, num_segments, resolution):
+    def normalizar_tangentes(self):
+        """Normaliza as tangentes para o intervalo [-1, 1]."""
+        tangentes = np.array([(t.x, t.y) for t in self.tangentes])
+        x_min, x_max = np.min(tangentes[:, 0]), np.max(tangentes[:, 0])
+        y_min, y_max = np.min(tangentes[:, 1]), np.max(tangentes[:, 1])
+
+        x_range = x_max - x_min
+        y_range = y_max - y_min
+
+        # Evita divisão por zero
+        x_range = x_range if x_range != 0 else 1
+        y_range = y_range if y_range != 0 else 1
+
+        tangentes[:, 0] = 2 * (tangentes[:, 0] - x_min) / x_range - 1
+        tangentes[:, 1] = 2 * (tangentes[:, 1] - y_min) / y_range - 1
+
+        return [Ponto(x, y) for x, y in tangentes]
+
+    def plotar_curva(self, num_segments, resolution, ax1, ax2):
         num_points = num_segments * 10 + 1  # Aumentar a densidade dos pontos para melhor visualização
 
         if len(self.pontos) < 2:
             print("Número insuficiente de pontos para gerar a curva.")
             return
 
-        plt.figure(figsize=(resolution[0] / 100, resolution[1] / 100), dpi=100)
-        plt.title(f"Curva de Hermite com {num_segments} segmentos")
-        plt.xlim(0, resolution[0])
-        plt.ylim(0, resolution[1])
-        plt.gca().set_aspect('equal', adjustable='box')
-        plt.xlabel('x')
-        plt.ylabel('y')
-        plt.grid(True)
+        # Normalizar as tangentes
+        tangentes_normalizadas = self.normalizar_tangentes()
+
+        # Gráfico normalizado
+        for i in range(len(self.pontos) - 1):
+            x, y = self.calcular_curva(num_points, self.pontos[i], tangentes_normalizadas[i], self.pontos[i + 1], tangentes_normalizadas[i + 1])
+            x, y = self.normalizar_coordenadas(x, y)
+            ax1.plot(x, y, 'k-', lw=1)
+
+        ax1.set_title("Espaço Normalizado")
+        ax1.set_xlim(-1, 1)
+        ax1.set_ylim(-1, 1)
+        ax1.set_aspect('equal', adjustable='box')
+        ax1.grid(True)
+
+        # Gráfico rasterizado
+        width, height = resolution
+        combined_image = np.zeros((height, width), dtype=np.uint8)
 
         for i in range(len(self.pontos) - 1):
-            # Calcula a curva para o segmento atual
-            x, y = self.calcular_curva(num_points, self.pontos[i], self.tangentes[i], self.pontos[i + 1], self.tangentes[i + 1])
+            x, y = self.calcular_curva(num_points, self.pontos[i], tangentes_normalizadas[i], self.pontos[i + 1], tangentes_normalizadas[i + 1])
             x, y = self.normalizar_coordenadas(x, y)
             x, y = self.escalonar_para_resolucao(x, y, resolution)
 
-            # Rasteriza os segmentos de reta
             for j in range(len(x) - 1):
                 pontos_segmento = self.rasterizar_linha(x[j], y[j], x[j + 1], y[j + 1])
-                px, py = zip(*pontos_segmento)
-                
-                plt.plot(px, py, 'k-', lw=1, label='Segmento de Reta' if i == 0 and j == 0 else "")
+                for px, py in pontos_segmento:
+                    if 0 <= int(round(py)) < height and 0 <= int(round(px)) < width:
+                        combined_image[int(round(py)), int(round(px))] = 1
 
-            # Marcando os pontos finais
-            # plt.plot(self.pontos[i].x, self.pontos[i].y, 'ro', markersize=8, label='Pontos Finais' if i == 0 else "")
-            # plt.plot(self.pontos[i + 1].x, self.pontos[i + 1].y, 'ro', markersize=8, label='Pontos Finais' if i == 0 else "")
-
-        plt.legend()
-        plt.show()
-
-# Exemplo de uso com 3 pontos
-# if __name__ == '__main__':
-#     pontos = [Ponto(0.2, 0.2), Ponto(-0.3, -0.4), Ponto(0.4, -0.2)]
-#     tangentes = [Ponto(0.9, 0.4), Ponto(-1, -0.8), Ponto(0.3, 0.5)]
-
-#     curva = CurvaHermite(pontos, tangentes)
-#     resolucoes = [(800, 600)]
-#     num_segments_list = [1, 2, 5, 20, 50]
-
-#     for res in resolucoes:
-#         for num_segments in num_segments_list:
-#             curva.plotar_curva(num_segments, res)
+        ax2.clear()
+        ax2.imshow(combined_image, cmap='gray', origin='lower')
+        ax2.set_title("Imagem Rasterizada")
+        ax2.set_xlim(0, width)
+        ax2.set_ylim(0, height)
+        ax2.set_aspect('equal', adjustable='box')
+        ax2.grid(True)
