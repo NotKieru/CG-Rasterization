@@ -1,46 +1,52 @@
+# poligonos.py
 import numpy as np
+import matplotlib.pyplot as plt
 
+def create_empty_image(size):
+    return np.zeros((size, size), dtype=np.uint8)
 
-def combine_matrices(matrices):
-    combined = np.zeros_like(matrices[0])
-    for matrix in matrices:
-        combined = np.where(matrix == 1, matrix, combined)
-    return combined
+def normalize_to_image_coords(normalized_coords, size):
+    return ((normalized_coords + 1) / 2 * (size - 1)).astype(int)
 
+def draw_polygon(image, vertices):
+    image_coords = normalize_to_image_coords(np.array(vertices), image.shape[0])
+    fill_polygon(image, image_coords)
 
-def flood_fill(matrix, x, y):
-    rows = len(matrix)
-    cols = len(matrix[0])
+def fill_polygon(image, points):
+    matrix = np.zeros_like(image)
+    scanline_fill(matrix, points)
+    image[np.where(matrix == 1)] = 1
 
-    if x < 0 or x >= rows or y < 0 or y >= cols:
-        return
-    if matrix[x][y] != 0:
-        return
-
-    matrix[x][y] = 1
-
-    flood_fill(matrix, x + 1, y)
-    flood_fill(matrix, x - 1, y)
-    flood_fill(matrix, x, y + 1)
-    flood_fill(matrix, x, y - 1)
-
-
-def scanline_fill(matrix):
-    rows = len(matrix)
-    cols = len(matrix[0])
-
-    for row in range(rows):
+def scanline_fill(matrix, points):
+    rows, cols = matrix.shape
+    min_x, min_y = np.min(points, axis=0).astype(int)
+    max_x, max_y = np.max(points, axis=0).astype(int)
+    
+    min_x = max(min_x, 0)
+    max_x = min(max_x, cols - 1)
+    min_y = max(min_y, 0)
+    max_y = min(max_y, rows - 1)
+    
+    for y in range(min_y, max_y + 1):
         intersections = []
-        for col in range(cols):
-            if matrix[row][col] == 1:
-                intersections.append(col)
-
-        if len(intersections) % 2 != 0:
-            intersections.append(cols - 1)
-
+        for i in range(len(points)):
+            x0, y0 = points[i]
+            x1, y1 = points[(i + 1) % len(points)]
+            
+            if (y0 < y <= y1) or (y1 < y <= y0):
+                if y0 != y1:
+                    x = int(x0 + (y - y0) * (x1 - x0) / (y1 - y0))
+                    intersections.append(x)
+        
+        intersections.sort()
         for i in range(0, len(intersections), 2):
-            if i + 1 < len(intersections):
-                for col in range(intersections[i] + 1, intersections[i + 1]):
-                    matrix[row][col] = 1
+            x0 = max(min(intersections[i], cols - 1), 0)
+            x1 = max(min(intersections[i + 1], cols - 1), 0)
+            if x0 < x1:
+                matrix[y, x0:x1 + 1] = 1
 
-    return matrix
+def show_image(image, title):
+    plt.imshow(image, cmap='gray', interpolation='none')
+    plt.title(title)
+    plt.axis('off')
+    plt.show()
