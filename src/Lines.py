@@ -71,3 +71,4 @@ def plot_rasterized_image(segments, width, height, ax):
     ax.clear()
     ax.imshow(combined_image, cmap='gray', origin='lower')
     ax.set_title('Imagem Rasterizada')
+    
