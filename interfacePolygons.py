@@ -3,7 +3,7 @@ from tkinter import ttk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 import numpy as np
-from src.Poligonos import create_empty_image, draw_polygon, show_image
+from src.Polygons import create_empty_image, draw_polygon
 
 class PolygonDrawerApp:
     def __init__(self, root):
@@ -20,11 +20,12 @@ class PolygonDrawerApp:
         self.current_resolution = self.resolutions["800x600"]
 
         # Criação da figura e do eixo
-        self.figure, self.ax = plt.subplots(figsize=(6, 6))
+        self.figure, self.ax1 = plt.subplots(figsize=(8, 6))
         self.canvas = FigureCanvasTkAgg(self.figure, master=self.root)
         self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
 
         self.create_widgets()
+        self.update_plots()
 
     def create_widgets(self):
         self.control_frame = ttk.Frame(self.root)
@@ -41,17 +42,24 @@ class PolygonDrawerApp:
         self.resolution_var = tk.StringVar(value="800x600")
         resolution_menu = ttk.Combobox(self.control_frame, textvariable=self.resolution_var, values=list(self.resolutions.keys()))
         resolution_menu.grid(row=1, column=1, padx=5, pady=5)
+        resolution_menu.bind("<<ComboboxSelected>>", self.update_plots)
 
         # Botão para mostrar o polígono
-        show_button = ttk.Button(self.control_frame, text="Mostrar Polígono", command=self.show_polygon)
+        show_button = ttk.Button(self.control_frame, text="Mostrar Polígono", command=self.update_plots)
         show_button.grid(row=2, column=0, columnspan=2, pady=5)
 
-    def show_polygon(self):
-        shape = self.shape_var.get()
+    def update_plots(self, event=None):
+        # Limpa o eixo antes de adicionar novos gráficos
+        self.ax1.clear()
+
+        # Atualiza a resolução com base na seleção do menu
         selected_resolution = self.resolution_var.get()
         self.current_resolution = self.resolutions[selected_resolution]
+        width, height = self.current_resolution
 
-        size = self.current_resolution[0]
+        # Atualiza o gráfico com a imagem do polígono
+        shape = self.shape_var.get()
+        size = width
         image = create_empty_image(size)
 
         # Definindo os vértices do polígono com base na escolha
@@ -77,12 +85,16 @@ class PolygonDrawerApp:
             return
         
         draw_polygon(image, vertices)
-        
+
         # Atualiza o gráfico com a imagem do polígono
-        self.ax.clear()
-        self.ax.imshow(image, cmap='gray', interpolation='none')
-        self.ax.set_title(title)
-        self.ax.axis('off')
+        self.ax1.imshow(image, cmap='gray', interpolation='none')
+        self.ax1.set_title(title)
+        self.ax1.axis('on')
+
+        # Inverte o eixo y
+        self.ax1.set_ylim(self.ax1.get_ylim()[::-1])
+
+        # Atualiza a exibição do gráfico no canvas
         self.canvas.draw()
 
 if __name__ == "__main__":
