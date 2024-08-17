@@ -35,7 +35,7 @@ class HermiteCurveApp:
 
         # Resolução
         tk.Label(self.control_frame, text="Resolução").grid(row=2, column=0, padx=10, pady=5)
-        self.resolution_var = tk.StringVar(value="800x600")
+        self.resolution_var = tk.StringVar(value="100x100")
         resolutions = ["100x100", "300x300", "800x600", "1920x1080"]
         resolution_menu = ttk.Combobox(self.control_frame, textvariable=self.resolution_var, values=resolutions)
         resolution_menu.grid(row=2, column=1, padx=5, pady=5)
@@ -76,13 +76,21 @@ class HermiteCurveApp:
                 x = x_entry.get().strip()
                 y = y_entry.get().strip()
                 if x and y:
-                    pontos.append(Ponto(float(x), float(y)))
+                    x = float(x)
+                    y = float(y)
+                    if not (-1 <= x <= 1 and -1 <= y <= 1):
+                        raise ValueError(f"Os valores devem estar no intervalo [-1, 1].")
+                    pontos.append(Ponto(x, y))
 
             for (x_entry, y_entry) in self.tangentes_entries:
                 x = x_entry.get().strip()
                 y = y_entry.get().strip()
                 if x and y:
-                    tangentes.append(Ponto(float(x), float(y)))
+                    x = float(x)
+                    y = float(y)
+                    if not (-1 <= x <= 1 and -1 <= y <= 1):
+                        raise ValueError(f"Os valores devem estar no intervalo [-1, 1].")
+                    tangentes.append(Ponto(x, y))
 
             return pontos, tangentes
         except ValueError as e:
@@ -101,7 +109,6 @@ class HermiteCurveApp:
 
             curva = CurvaHermite(pontos, tangentes)
             self.ax1.clear()
-            # self.ax2.clear()
             curva.plotar_curva(num_segments=num_segments, resolution=resolution, ax1=self.ax1)
             self.canvas.draw()
         except ValueError as e:
@@ -109,7 +116,6 @@ class HermiteCurveApp:
 
     def update_plots(self):
         self.ax1.clear()
-        # self.ax2.clear()
         self.canvas.draw()
 
 if __name__ == "__main__":

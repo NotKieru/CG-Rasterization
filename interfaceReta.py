@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
-from src.Lines import plot_rasterized_image  # plot_normalized_lines está comentada
+from src.Lines import plot_rasterized_image
 
 class LineDrawerApp:
     def __init__(self, root):
@@ -16,7 +16,7 @@ class LineDrawerApp:
             "800x600": (800, 600),
             "1920x1080": (1920, 1080)
         }
-        self.current_resolution = self.resolutions["800x600"]
+        self.current_resolution = self.resolutions["300x300"]
 
         # Criação da figura e dos eixos
        # self.figure, (self.ax1, self.ax2) = plt.subplots(1, 2, figsize=(12, 6))

@@ -16,7 +16,7 @@ class PolygonDrawerApp:
             "800x600": (800, 600),
             "1920x1080": (1920, 1080)
         }
-        self.current_resolution = self.resolutions["800x600"]
+        self.current_resolution = self.resolutions["100x100"]
 
         # Criação da figura e do eixo
         self.figure, self.ax1 = plt.subplots(figsize=(8, 6))
