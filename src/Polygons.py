@@ -1,52 +1,85 @@
-# poligonos.py
 import numpy as np
 import matplotlib.pyplot as plt
 
-def create_empty_image(size):
-    return np.zeros((size, size), dtype=np.uint8)
+def normalize_point(x, y, x_min, x_max, y_min, y_max):
+    """
+    Normaliza um ponto (x, y) para o intervalo [-1, 1] com base nos intervalos fornecidos.
+    """
+    x_normalized = 2 * (x - x_min) / (x_max - x_min) - 1
+    y_normalized = 2 * (y - y_min) / (y_max - y_min) - 1
+    return x_normalized, y_normalized
 
-def normalize_to_image_coords(normalized_coords, size):
-    return ((normalized_coords + 1) / 2 * (size - 1)).astype(int)
-
-def draw_polygon(image, vertices):
-    image_coords = normalize_to_image_coords(np.array(vertices), image.shape[0])
-    fill_polygon(image, image_coords)
-
-def fill_polygon(image, points):
-    matrix = np.zeros_like(image)
-    scanline_fill(matrix, points)
-    image[np.where(matrix == 1)] = 1
-
-def scanline_fill(matrix, points):
-    rows, cols = matrix.shape
-    min_x, min_y = np.min(points, axis=0).astype(int)
-    max_x, max_y = np.max(points, axis=0).astype(int)
+def rasterize_polygon(vertices, width, height):
+    """
+    Rasteriza um polígono em uma imagem de resolução (width, height) usando o algoritmo de cruzamento.
+    """
+    # Normaliza os pontos
+    normalized_vertices = [normalize_point(x, y, -1, 1, -1, 1) for x, y in vertices]
+    # Converte os pontos normalizados para a resolução da imagem
+    vertices = [(int((x + 1) * (width - 1) / 2), int((y + 1) * (height - 1) / 2)) for x, y in normalized_vertices]
     
-    min_x = max(min_x, 0)
-    max_x = min(max_x, cols - 1)
-    min_y = max(min_y, 0)
-    max_y = min(max_y, rows - 1)
+    image = np.zeros((height, width), dtype=np.uint8)
+    num_vertices = len(vertices)
     
-    for y in range(min_y, max_y + 1):
+    # Preenchimento de scanline
+    for y in range(height):
         intersections = []
-        for i in range(len(points)):
-            x0, y0 = points[i]
-            x1, y1 = points[(i + 1) % len(points)]
+        for i in range(num_vertices):
+            x0, y0 = vertices[i]
+            x1, y1 = vertices[(i + 1) % num_vertices]
             
-            if (y0 < y <= y1) or (y1 < y <= y0):
+            # Verifica se a linha cruza a linha horizontal na coordenada y
+            if min(y0, y1) <= y <= max(y0, y1):
                 if y0 != y1:
-                    x = int(x0 + (y - y0) * (x1 - x0) / (y1 - y0))
-                    intersections.append(x)
+                    x_intersection = x0 + (y - y0) * (x1 - x0) / (y1 - y0)
+                    intersections.append(x_intersection)
         
         intersections.sort()
+        
+        # Preenche os pixels entre os pontos de interseção
         for i in range(0, len(intersections), 2):
-            x0 = max(min(intersections[i], cols - 1), 0)
-            x1 = max(min(intersections[i + 1], cols - 1), 0)
-            if x0 < x1:
-                matrix[y, x0:x1 + 1] = 1
+            x_start = int(round(intersections[i]))
+            x_end = int(round(intersections[i + 1]))
+            if 0 <= x_start < width and 0 <= x_end < width:
+                image[y, x_start:x_end + 1] = 1
+    
+    return image
 
-def show_image(image, title):
-    plt.imshow(image, cmap='gray', interpolation='none')
-    plt.title(title)
-    plt.axis('off')
+def plot_rasterized_image(image, ax):
+    """
+    Plota a imagem rasterizada.
+    """
+    ax.clear()
+    ax.imshow(image, cmap='gray', origin='lower')
+    ax.set_title('Imagem Rasterizada')
+
+def plot_normalized_polygon(vertices, ax):
+    """
+    Plota o polígono em um espaço normalizado [-1, 1].
+    """
+    ax.clear()
+    vertices.append(vertices[0])  # Fecha o polígono
+    xs, ys = zip(*vertices)
+    ax.plot(xs, ys, marker='o')
+    ax.set_xlim(-1, 1)
+    ax.set_ylim(-1, 1)
+    ax.set_aspect('equal')
+    ax.set_title('Espaço Normalizado')
+
+def main():
+    width, height = 100, 100
+    
+    # Defina os vértices do triângulo equilátero
+    vertices = [(-0.5, -0.5), (0.5, -0.5), (0, 0.5)]
+    
+    # Rasterize the triangle
+    image = rasterize_polygon(vertices, width, height)
+    
+    # Plot
+    fig, ax = plt.subplots(1, 2, figsize=(12, 6))
+    plot_normalized_polygon(vertices, ax[0])
+    plot_rasterized_image(image, ax[1])
     plt.show()
+
+if __name__ == "__main__":
+    main()
