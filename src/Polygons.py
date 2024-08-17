@@ -1,5 +1,6 @@
 import numpy as np
-import matplotlib.pyplot as plt
+from matplotlib.path import Path
+from scipy.ndimage import binary_fill_holes
 
 def normalize_point(x, y, x_min, x_max, y_min, y_max):
     """
@@ -9,7 +10,7 @@ def normalize_point(x, y, x_min, x_max, y_min, y_max):
     y_normalized = 2 * (y - y_min) / (y_max - y_min) - 1
     return x_normalized, y_normalized
 
-def rasterize_polygon(vertices, width, height):
+def scanline(vertices, width, height):
     """
     Rasteriza um polígono em uma imagem de resolução (width, height) usando o algoritmo de cruzamento.
     """
@@ -18,56 +19,26 @@ def rasterize_polygon(vertices, width, height):
     # Converte os pontos normalizados para a resolução da imagem
     vertices = [(int((x + 1) * (width - 1) / 2), int((y + 1) * (height - 1) / 2)) for x, y in normalized_vertices]
     
+    # Cria uma imagem em branco
     image = np.zeros((height, width), dtype=np.uint8)
-    num_vertices = len(vertices)
     
-    # Preenchimento de scanline
-    for y in range(height):
-        intersections = []
-        for i in range(num_vertices):
-            x0, y0 = vertices[i]
-            x1, y1 = vertices[(i + 1) % num_vertices]
-            
-            # Verifica se a linha cruza a linha horizontal na coordenada y
-            if min(y0, y1) <= y <= max(y0, y1):
-                if y0 != y1:
-                    x_intersection = x0 + (y - y0) * (x1 - x0) / (y1 - y0)
-                    intersections.append(x_intersection)
-        
-        intersections.sort()
-        
-        # Preenche os pixels entre os pontos de interseção
-        for i in range(0, len(intersections) - 1, 2):
-            x_start = int(round(intersections[i]))
-            x_end = int(round(intersections[i + 1]))
-            if 0 <= x_start < width and 0 <= x_end < width:
-                image[y, x_start:x_end + 1] = 1
+    # Cria um Path do matplotlib para o polígono
+    path = Path(vertices)
     
-    return image
-
-def plot_rasterized_image(images, titles, width, height, ax):
-    """
-    Plota a imagem rasterizada com todos os polígonos.
-    """
-    ax.clear()
-    for image, title in zip(images, titles):
-        ax.imshow(image, cmap='gray', origin='lower')
-        ax.set_title(title)
-        plt.pause(1)
-    plt.show()
-
-def plot_normalized_polygon(vertices, ax, title):
-    """
-    Plota o polígono em um espaço normalizado [-1, 1].
-    """
-    ax.clear()
-    vertices.append(vertices[0])  # Fecha o polígono
-    xs, ys = zip(*vertices)
-    ax.plot(xs, ys, marker='o')
-    ax.set_xlim(-1, 1)
-    ax.set_ylim(-1, 1)
-    ax.set_aspect('equal')
-    ax.set_title(title)
+    # Gera uma grade de coordenadas (x, y)
+    x, y = np.meshgrid(np.arange(width), np.arange(height))
+    points = np.vstack((x.ravel(), y.ravel())).T
+    
+    # Verifica se os pontos estão dentro do polígono
+    grid = path.contains_points(points)
+    
+    # Preenche a imagem com os pontos dentro do polígono
+    image[grid.reshape(height, width)] = 1
+    
+    # Preenchimento usando flood-fill para lidar com qualquer lacuna interna
+    floodfill = binary_fill_holes(image).astype(np.uint8)
+    
+    return floodfill
 
 def generate_triangle(rotation=0):
     """
@@ -123,29 +94,21 @@ def generate_hexagon(rotation=0):
     ]
     return rotated_vertices
 
-def main():
-    width, height = 600, 600
-    
-    # Definindo os polígonos
-    polygons = [
-        (generate_triangle(), "Triângulo Equilátero 1"),
-        (generate_triangle(rotation=30), "Triângulo Equilátero 2"),
-        (generate_square(), "Quadrado 1"),
-        (generate_square(rotation=45), "Quadrado 2"),
-        (generate_hexagon(), "Hexágono 1"),
-        (generate_hexagon(rotation=30), "Hexágono 2")
-    ]
-    
-    images = []
-    titles = []
-    
-    for vertices, title in polygons:
-        image = rasterize_polygon(vertices, width, height)
-        images.append(image)
-        titles.append(title)
-    
-    fig, ax = plt.subplots(1, 1, figsize=(10, 10))
-    plot_rasterized_image(images, titles, width, height, ax)
-
-if __name__ == "__main__":
-    main()
+def get_polygon_vertices(shape, rotation=0):
+    """
+    Retorna os vértices do polígono com base na forma e rotação.
+    """
+    if shape == 'Triângulo Equilátero 1':
+        return generate_triangle(rotation)
+    elif shape == 'Triângulo Equilátero 2':
+        return generate_triangle(rotation=30)
+    elif shape == 'Quadrado 1':
+        return generate_square(rotation)
+    elif shape == 'Quadrado 2':
+        return generate_square(rotation=45)
+    elif shape == 'Hexágono 1':
+        return generate_hexagon(rotation)
+    elif shape == 'Hexágono 2':
+        return generate_hexagon(rotation=30)
+    else:
+        raise ValueError("Forma desconhecida")

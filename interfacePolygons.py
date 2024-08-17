@@ -2,8 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
-import numpy as np
-from src.Polygons import create_empty_image, draw_polygon
+from src.Polygons import scanline, get_polygon_vertices
 
 class PolygonDrawerApp:
     def __init__(self, root):
@@ -59,42 +58,17 @@ class PolygonDrawerApp:
 
         # Atualiza o gráfico com a imagem do polígono
         shape = self.shape_var.get()
-        size = width
-        image = create_empty_image(size)
-
-        # Definindo os vértices do polígono com base na escolha
-        if shape == 'Triângulo Equilátero 1':
-            vertices = [[-0.5, -0.5], [0.5, -0.5], [0, 0.5]]
-            title = 'Triângulo Equilátero 1'
-        elif shape == 'Triângulo Equilátero 2':
-            vertices = [[-0.5, 0.5], [0.5, 0.5], [0, -0.5]]
-            title = 'Triângulo Equilátero 2'
-        elif shape == 'Quadrado 1':
-            vertices = [[-0.5, -0.5], [0.5, -0.5], [0.5, 0.5], [-0.5, 0.5]]
-            title = 'Quadrado 1'
-        elif shape == 'Quadrado 2':
-            vertices = [[-0.6, -0.3], [0.6, -0.3], [0.6, 0.3], [-0.6, 0.3]]
-            title = 'Quadrado 2'
-        elif shape == 'Hexágono 1':
-            vertices = [[-0.5, 0], [-0.25, -0.433], [0.25, -0.433], [0.5, 0], [0.25, 0.433], [-0.25, 0.433]]
-            title = 'Hexágono 1'
-        elif shape == 'Hexágono 2':
-            vertices = [[-0.5, -0.5], [-0.25, -0.25], [0.25, -0.25], [0.5, -0.5], [0.25, -0.75], [-0.25, -0.75]]
-            title = 'Hexágono 2'
-        else:
-            return
+        vertices = get_polygon_vertices(shape)
+        image = scanline(vertices, width, height)
         
-        draw_polygon(image, vertices)
-
-        # Atualiza o gráfico com a imagem do polígono
-        self.ax1.imshow(image, cmap='gray', interpolation='none')
-        self.ax1.set_title(title)
+         # Exibe a imagem na tela
+        self.ax1.imshow(image, cmap='gray', origin='lower')
+        self.ax1.set_title(f"{shape} ({selected_resolution})")
+        self.ax1.set_xlabel(f'X (0 to {width})')
+        self.ax1.set_ylabel(f'Y (0 to {height})')
         self.ax1.axis('on')
-
-        # Inverte o eixo y
-        self.ax1.set_ylim(self.ax1.get_ylim()[::-1])
-
-        # Atualiza a exibição do gráfico no canvas
+        
+        # Atualiza o canvas
         self.canvas.draw()
 
 if __name__ == "__main__":
