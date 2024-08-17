@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
-from src.Lines import plot_normalized_lines, plot_rasterized_image
+from src.Lines import plot_rasterized_image  # plot_normalized_lines está comentada
 
 class LineDrawerApp:
     def __init__(self, root):
@@ -19,7 +19,8 @@ class LineDrawerApp:
         self.current_resolution = self.resolutions["800x600"]
 
         # Criação da figura e dos eixos
-        self.figure, (self.ax1, self.ax2) = plt.subplots(1, 2, figsize=(12, 6))
+       # self.figure, (self.ax1, self.ax2) = plt.subplots(1, 2, figsize=(12, 6))
+        self.figure, (self.ax1) = plt.subplots(1, figsize=(12, 6))
         self.canvas = FigureCanvasTkAgg(self.figure, master=self.root)
         self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
         
@@ -83,15 +84,15 @@ class LineDrawerApp:
     def update_plots(self):
         # Limpa os eixos antes de adicionar novos gráficos
         self.ax1.clear()
-        self.ax2.clear()
+        #self.ax2.clear()
         
         # Atualiza a resolução com base na seleção do menu
         selected_resolution = self.resolution_var.get()
         self.current_resolution = self.resolutions[selected_resolution]
         
         # Adiciona os gráficos
-        plot_normalized_lines(self.segments, self.ax1)
-        plot_rasterized_image(self.segments, *self.current_resolution, self.ax2)
+        # plot_normalized_lines(self.segments, self.ax1)  # Comentado para não exibir gráfico normalizado
+        plot_rasterized_image(self.segments, *self.current_resolution, self.ax1)
         
         # Atualiza a exibição do gráfico no canvas
         self.canvas.draw()

@@ -46,18 +46,18 @@ def rasterize_line(x0, y0, x1, y1, width, height):
     
     return image
 
-def plot_normalized_lines(segments, ax):
-    """
-    Plota segmentos de reta em um espaço normalizado [-1, 1].
-    """
-    ax.clear()
-    for (x0, y0), (x1, y1) in segments:
-        ax.plot([x0, x1], [y0, y1], marker='o')
+# def plot_normalized_lines(segments, ax):
+#     """
+#     Plota segmentos de reta em um espaço normalizado [-1, 1].
+#     """
+#     ax.clear()
+#     for (x0, y0), (x1, y1) in segments:
+#         ax.plot([x0, x1], [y0, y1], marker='o')
     
-    ax.set_xlim(-1, 1)
-    ax.set_ylim(-1, 1)
-    ax.set_aspect('equal')
-    ax.set_title('Espaço Normalizado')
+#     ax.set_xlim(-1, 1)
+#     ax.set_ylim(-1, 1)
+#     ax.set_aspect('equal')
+#     ax.set_title('Espaço Normalizado')
 
 def plot_rasterized_image(segments, width, height, ax):
     """
@@ -71,4 +71,3 @@ def plot_rasterized_image(segments, width, height, ax):
     ax.clear()
     ax.imshow(combined_image, cmap='gray', origin='lower')
     ax.set_title('Imagem Rasterizada')
-    

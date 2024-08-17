@@ -88,7 +88,7 @@ class CurvaHermite:
 
         return [Ponto(x, y) for x, y in tangentes]
 
-    def plotar_curva(self, num_segments, resolution, ax1, ax2):
+    def plotar_curva(self, num_segments, resolution, ax1):
         num_points = num_segments * 10 + 1  # Aumentar a densidade dos pontos para melhor visualização
 
         if len(self.pontos) < 2:
@@ -98,17 +98,17 @@ class CurvaHermite:
         # Normalizar as tangentes
         tangentes_normalizadas = self.normalizar_tangentes()
 
-        # Gráfico normalizado
-        for i in range(len(self.pontos) - 1):
-            x, y = self.calcular_curva(num_points, self.pontos[i], tangentes_normalizadas[i], self.pontos[i + 1], tangentes_normalizadas[i + 1])
-            x, y = self.normalizar_coordenadas(x, y)
-            ax1.plot(x, y, 'k-', lw=1)
+        # # Gráfico normalizado
+        # for i in range(len(self.pontos) - 1):
+        #     x, y = self.calcular_curva(num_points, self.pontos[i], tangentes_normalizadas[i], self.pontos[i + 1], tangentes_normalizadas[i + 1])
+        #     x, y = self.normalizar_coordenadas(x, y)
+        #     ax1.plot(x, y, 'k-', lw=1)
 
-        ax1.set_title("Espaço Normalizado")
-        ax1.set_xlim(-1, 1)
-        ax1.set_ylim(-1, 1)
-        ax1.set_aspect('equal', adjustable='box')
-        ax1.grid(True)
+        # ax1.set_title("Espaço Normalizado")
+        # ax1.set_xlim(-1, 1)
+        # ax1.set_ylim(-1, 1)
+        # ax1.set_aspect('equal', adjustable='box')
+        # ax1.grid(True)
 
         # Gráfico rasterizado
         width, height = resolution
@@ -125,10 +125,10 @@ class CurvaHermite:
                     if 0 <= int(round(py)) < height and 0 <= int(round(px)) < width:
                         combined_image[int(round(py)), int(round(px))] = 1
 
-        ax2.clear()
-        ax2.imshow(combined_image, cmap='gray', origin='lower')
-        ax2.set_title("Imagem Rasterizada")
-        ax2.set_xlim(0, width)
-        ax2.set_ylim(0, height)
-        ax2.set_aspect('equal', adjustable='box')
-        ax2.grid(True)
+        ax1.clear()
+        ax1.imshow(combined_image, cmap='gray', origin='lower')
+        ax1.set_title("Imagem Rasterizada")
+        ax1.set_xlim(0, width)
+        ax1.set_ylim(0, height)
+        ax1.set_aspect('equal', adjustable='box')
+        ax1.grid(True)

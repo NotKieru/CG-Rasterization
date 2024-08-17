@@ -10,7 +10,7 @@ class HermiteCurveApp:
         self.root.title("Curva de Hermite")
 
         # Configuração da figura e eixos para gráficos
-        self.figure, (self.ax1, self.ax2) = plt.subplots(1, 2, figsize=(12, 6))
+        self.figure, (self.ax1) = plt.subplots(1, figsize=(12, 6))
         self.canvas = FigureCanvasTkAgg(self.figure, master=self.root)
         self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
 
@@ -101,15 +101,15 @@ class HermiteCurveApp:
 
             curva = CurvaHermite(pontos, tangentes)
             self.ax1.clear()
-            self.ax2.clear()
-            curva.plotar_curva(num_segments=num_segments, resolution=resolution, ax1=self.ax1, ax2=self.ax2)
+            # self.ax2.clear()
+            curva.plotar_curva(num_segments=num_segments, resolution=resolution, ax1=self.ax1)
             self.canvas.draw()
         except ValueError as e:
             messagebox.showerror("Erro", f"Dados inválidos: {e}")
 
     def update_plots(self):
         self.ax1.clear()
-        self.ax2.clear()
+        # self.ax2.clear()
         self.canvas.draw()
 
 if __name__ == "__main__":
