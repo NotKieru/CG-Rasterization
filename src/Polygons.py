@@ -37,7 +37,7 @@ def rasterize_polygon(vertices, width, height):
         intersections.sort()
         
         # Preenche os pixels entre os pontos de interseção
-        for i in range(0, len(intersections), 2):
+        for i in range(0, len(intersections) - 1, 2):
             x_start = int(round(intersections[i]))
             x_end = int(round(intersections[i + 1]))
             if 0 <= x_start < width and 0 <= x_end < width:
@@ -45,15 +45,18 @@ def rasterize_polygon(vertices, width, height):
     
     return image
 
-def plot_rasterized_image(image, ax):
+def plot_rasterized_image(images, titles, width, height, ax):
     """
-    Plota a imagem rasterizada.
+    Plota a imagem rasterizada com todos os polígonos.
     """
     ax.clear()
-    ax.imshow(image, cmap='gray', origin='lower')
-    ax.set_title('Imagem Rasterizada')
+    for image, title in zip(images, titles):
+        ax.imshow(image, cmap='gray', origin='lower')
+        ax.set_title(title)
+        plt.pause(1)
+    plt.show()
 
-def plot_normalized_polygon(vertices, ax):
+def plot_normalized_polygon(vertices, ax, title):
     """
     Plota o polígono em um espaço normalizado [-1, 1].
     """
@@ -64,22 +67,85 @@ def plot_normalized_polygon(vertices, ax):
     ax.set_xlim(-1, 1)
     ax.set_ylim(-1, 1)
     ax.set_aspect('equal')
-    ax.set_title('Espaço Normalizado')
+    ax.set_title(title)
+
+def generate_triangle(rotation=0):
+    """
+    Gera um triângulo equilátero.
+    """
+    angle = np.deg2rad(rotation)
+    cos_a = np.cos(angle)
+    sin_a = np.sin(angle)
+    vertices = [
+        (0, 1),
+        (np.sqrt(3)/2, -0.5),
+        (-np.sqrt(3)/2, -0.5)
+    ]
+    rotated_vertices = [
+        (x * cos_a - y * sin_a, x * sin_a + y * cos_a)
+        for x, y in vertices
+    ]
+    return rotated_vertices
+
+def generate_square(rotation=0):
+    """
+    Gera um quadrado.
+    """
+    angle = np.deg2rad(rotation)
+    cos_a = np.cos(angle)
+    sin_a = np.sin(angle)
+    vertices = [
+        (-0.5, -0.5),
+        (0.5, -0.5),
+        (0.5, 0.5),
+        (-0.5, 0.5)
+    ]
+    rotated_vertices = [
+        (x * cos_a - y * sin_a, x * sin_a + y * cos_a)
+        for x, y in vertices
+    ]
+    return rotated_vertices
+
+def generate_hexagon(rotation=0):
+    """
+    Gera um hexágono regular.
+    """
+    angle = np.deg2rad(rotation)
+    cos_a = np.cos(angle)
+    sin_a = np.sin(angle)
+    vertices = [
+        (np.cos(np.deg2rad(60 * i)), np.sin(np.deg2rad(60 * i)))
+        for i in range(6)
+    ]
+    rotated_vertices = [
+        (x * cos_a - y * sin_a, x * sin_a + y * cos_a)
+        for x, y in vertices
+    ]
+    return rotated_vertices
 
 def main():
-    width, height = 100, 100
+    width, height = 600, 600
     
-    # Defina os vértices do triângulo equilátero
-    vertices = [(-0.5, -0.5), (0.5, -0.5), (0, 0.5)]
+    # Definindo os polígonos
+    polygons = [
+        (generate_triangle(), "Triângulo Equilátero 1"),
+        (generate_triangle(rotation=30), "Triângulo Equilátero 2"),
+        (generate_square(), "Quadrado 1"),
+        (generate_square(rotation=45), "Quadrado 2"),
+        (generate_hexagon(), "Hexágono 1"),
+        (generate_hexagon(rotation=30), "Hexágono 2")
+    ]
     
-    # Rasterize the triangle
-    image = rasterize_polygon(vertices, width, height)
+    images = []
+    titles = []
     
-    # Plot
-    fig, ax = plt.subplots(1, 2, figsize=(12, 6))
-    plot_normalized_polygon(vertices, ax[0])
-    plot_rasterized_image(image, ax[1])
-    plt.show()
+    for vertices, title in polygons:
+        image = rasterize_polygon(vertices, width, height)
+        images.append(image)
+        titles.append(title)
+    
+    fig, ax = plt.subplots(1, 1, figsize=(10, 10))
+    plot_rasterized_image(images, titles, width, height, ax)
 
 if __name__ == "__main__":
     main()
