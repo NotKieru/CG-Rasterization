@@ -144,17 +144,17 @@ def get_polygon_vertices(shape, rotation=0):
     :param rotation: Ângulo de rotação em graus
     :return: Vértices do polígono rotacionado
     """
-    if shape == 'Equilateral Triangle 1':
+    if shape == 'Triangulo 1':
         return generate_triangle(rotation)
-    elif shape == 'Equilateral Triangle 2':
+    elif shape == 'Triangulo 2':
         return generate_triangle(rotation=30)
-    elif shape == 'Square 1':
+    elif shape == 'Quadrado 1':
         return generate_square(rotation)
-    elif shape == 'Square 2':
+    elif shape == 'Quadrado 2':
         return generate_square(rotation=45)
-    elif shape == 'Hexagon 1':
+    elif shape == 'Hexagono 1':
         return generate_hexagon(rotation)
-    elif shape == 'Hexagon 2':
+    elif shape == 'Hexagono 2':
         return generate_hexagon(rotation=30)
     else:
         raise ValueError("Unknown shape")
