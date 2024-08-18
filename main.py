@@ -7,7 +7,7 @@ from interfaceCurva import HermiteCurveApp
 class MainApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("Interface Principal de Rasterização")
+        self.root.title("Computação Gráfica")
         
         # Definindo o tamanho da janela principal
         self.root.geometry("600x400")  # Largura x Altura
