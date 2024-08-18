@@ -1,82 +1,77 @@
-# Trabalho 1 – 1ª Etapa de Computação Gráfica
+# Project 1 – 1st Stage of Computer Graphics
 
-Instituto Federal do Ceará - Campus Fortaleza  
-Departamento de Telemática  
-Curso: Engenharia da Computação  
-Disciplina: Computação Gráfica 2024.1
+Instituto Federal do Ceará - Campus Fortaleza    
+Course: Computer Engineering  
+Subject: Computer Graphics 2024.1
 
-## Objetivo
+## Objective
 
-Este repositório contém a implementação de algoritmos de rasterização para retas, polígonos convexos e curvas de Hermite, conforme descrito na disciplina de Computação Gráfica 2024.1. Os métodos implementados são baseados no livro *Computação Gráfica: Teoria e Prática* de Eduardo Azevedo e Aura Consi.
+This repository contains the implementation of rasterization algorithms for lines, convex polygons, and Hermite curves, as described in the Computer Graphics 2024.1 course. The implemented methods are based on the book *Computer Graphics: Theory and Practice* by Eduardo Azevedo and Aura Consi.
 
-### Rasterização de Retas
+### Line Rasterization
 
-Implementei o algoritmo de rasterização de retas para um modelo (segmento de reta) no \(\mathbb{R}^2\) para uma imagem. As diretrizes estão na subseção 5.2.1 do livro mencionado. O algoritmo de Bresenham não foi utilizado.
+I implemented the line rasterization algorithm for a model (line segment) in \(\mathbb{R}^2\) for an image. The guidelines are in subsection 5.2.1 of the mentioned book. The Bresenham algorithm was not used.
 
-### Rasterização de Polígonos Convexos
+### Convex Polygon Rasterization
 
-Implementei o algoritmo de rasterização de polígonos convexos descrito na subseção 5.2.2 do livro, que utiliza o algoritmo de rasterização de retas.
+I implemented the convex polygon rasterization algorithm described in subsection 5.2.2 of the book, which uses the line rasterization algorithm.
 
-### Curvas de Hermite
+### Hermite Curves
 
-Implementei as curvas de Hermite conforme descrito na subseção 3.1.6 do livro e discutido em sala de aula.
+I implemented Hermite curves as described in subsection 3.1.6 of the book and discussed in class.
 
+### Line Rasterization
 
-### Rasterização de Retas
+- Obtain images of the rasterization of at least 5 different line segments for at least 4 different resolutions.
+- Implement for situations where \(|\Delta x| > |\Delta y|\) and \(|\Delta y| > |\Delta x|\).
+- Consider situations where the rays grow (\(m > 0\)) or decrease (\(m < 0\)).
+- Evaluate and adjust the algorithm for vertical and horizontal lines, including at least one vertical and one horizontal segment.
 
-- Obtenha imagens da rasterização de pelo menos 5 segmentos de retas diferentes para pelo menos 4 resoluções diferentes.
-- Implemente para situações onde \(|\Delta x| > |\Delta y|\) e \(|\Delta y| > |\Delta x|\).
-- Considere situações em que as semirretas crescem (\(m > 0\)) ou decrescem (\(m < 0\)).
-- Avalie e ajuste o algoritmo para retas verticais e horizontais, incluindo pelo menos um segmento vertical e um horizontal.
+### Hermite Curve Rasterization
 
-### Rasterização de Curvas de Hermite
+- Obtain images of the rasterization of at least 5 different Hermite curves.
+- Generate at least one curve with \(P_1\) and \(P_2\) equal.
+- Create curves with at least 3 different numbers of points, based on regularly spaced values for the parameter \(t\). Connect them into line segments to describe the curve and rasterize these curves. Show the dependence of curve quality on the number of line segments used.
 
-- Obtenha imagens da rasterização de pelo menos 5 curvas de Hermite diferentes.
-- Gere pelo menos uma curva com \(P_1\) e \(P_2\) iguais.
-- Crie curvas com pelo menos 3 quantidades de pontos diferentes, baseados em valores regularmente espaçados para o parâmetro \(t\). Conecte-os em segmentos de reta para descrever a curva e realize a rasterização dessas curvas. Mostre a dependência da qualidade da curva em relação à quantidade de segmentos de reta usados.
+### Polygon Rasterization
 
-### Rasterização de Polígonos
+- Obtain images of the rasterization of at least 6 polygons (equilateral triangles, squares, and hexagons, 2 for each) for at least 4 different resolutions.
 
-- Obtenha imagens da rasterização de pelo menos 6 polígonos (triângulos equiláteros, quadrados e hexágonos, 2 para cada) para pelo menos 4 resoluções diferentes.
+### General Considerations
 
-### Considerações Gerais
+- The elements (line segments, Hermite curves, and polygons) are defined in the continuous 2D normalized space with components \((x_1\) and \(x_2)\) in the range \([-1, +1]\) and converted to resolutions of 100 x 100, 300 x 300, 800 x 600, and 1920 x 1080.
+- Compare the generated elements in terms of quality for the various resolutions and number of points, in the case of Hermite curves.
+- Evaluate the implementation with more than one element (including different types) in the normalized space.
+- Create a graphical interface to display the elements in the normalized space and the generated images. The interface should allow the user to define/create the elements to be placed in the normalized space.
 
-- Os elementos (segmentos de reta, curvas de Hermite e polígonos) são definidos no contínuo em um espaço normalizado bidimensional com componentes \((x_1\) e \(x_2)\) no intervalo \([-1, +1]\) e convertidos para as resoluções 100 x 100, 300 x 300, 800 x 600 e 1920 x 1080.
-- Compare os elementos gerados em termos de qualidade para as diversas resoluções e número de pontos, no caso das curvas de Hermite.
-- Avalie a implementação com mais de um elemento (inclusive de tipos diferentes) no espaço normalizado.
-- Crie uma interface gráfica para mostrar os elementos no espaço normalizado e as imagens geradas. A interface deve permitir ao usuário definir/criar os elementos a serem colocados no espaço normalizado.
-
-## Bibliotecas Utilizadas
+## Libraries Used
 
 ### Tkinter
 
-Biblioteca padrão para a criação de interfaces gráficas em Python. É utilizada para criar a interface gráfica dos aplicativos, incluindo botões, menus e campos de entrada.
+Standard library for creating graphical user interfaces in Python. It is used to create the graphical interface of applications, including buttons, menus, and input fields.
 
 ### Matplotlib
 
-Biblioteca para a criação de gráficos em Python. Utilizada para desenhar as curvas de Hermite e os polígonos. `FigureCanvasTkAgg` é um adaptador para integrar gráficos Matplotlib com a interface Tkinter.
+Library for creating graphs in Python. Used to draw Hermite curves and polygons. `FigureCanvasTkAgg` is an adapter for integrating Matplotlib graphics with the Tkinter interface.
 
 ### src.hermiteCurve
 
-Módulo personalizado que contém a classe `Point` e `HermiteCurve`, responsável por calcular e plotar as curvas de Hermite.
+Custom module containing the `Point` and `HermiteCurve` classes, responsible for calculating and plotting Hermite curves.
 
 ### src.Polygons
 
-Módulo personalizado que inclui funções para rasterização de polígonos, como `scanline` e `get_polygon_vertices`.
+Custom module that includes functions for polygon rasterization, such as `scanline` and `get_polygon_vertices`.
 
 ### src.lines
 
-Módulo personalizado que contém a função de rasterização de linhas, conforme descrito na subseção 5.2.1 do livro. Este módulo é responsável por rasterizar segmentos de reta e lidar com diferentes casos de inclinação e resolução.
+Custom module containing the line rasterization function, as described in subsection 5.2.1 of the book. This module is responsible for rasterizing line segments and handling different cases of slope and resolution.
 
-1. **Instruções para rodar este projeto**
-
-   
+1. **Instructions to Run This Project**
 
    ```bash
-   clone este projeto
+   clone this project
    pip install matplotlib
    pip install tkinter
    pip install numpy
 
    python .\main.py
-
