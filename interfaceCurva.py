@@ -42,7 +42,7 @@ class HermiteCurveApp:
 
         # Quantidade de segmentos
         tk.Label(self.control_frame, text="Número de segmentos").grid(row=2, column=2, padx=10, pady=5)
-        self.num_segments_var = tk.IntVar(value=3)
+        self.num_segments_var = tk.IntVar(value=5)
         tk.Spinbox(self.control_frame, from_=1, to_=100, textvariable=self.num_segments_var).grid(row=2, column=3, padx=5, pady=5)
 
         # Botão para plotar a curva
@@ -118,9 +118,11 @@ class HermiteCurveApp:
             curve = HermiteCurve(points, tangents)
             self.ax1.clear()
             curve.plot_curve(num_segments=num_segments, resolution=resolution, ax1=self.ax1)
+            self.figure.tight_layout()  # Ajusta o layout da figura
             self.canvas.draw()
         except ValueError as e:
             messagebox.showerror("Error", f"Invalid data: {e}")
+
 
     def update_plots(self):
         """

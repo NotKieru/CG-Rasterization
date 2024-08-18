@@ -12,7 +12,7 @@ class PolygonDrawerApp:
         :param root: Instância da janela principal do Tkinter
         """
         self.root = root
-        self.root.title("Polygon Drawing Interface")
+        self.root.title("Rasterização de Poligonos")
 
         # Resoluções padrão para a imagem
         self.resolutions = {
@@ -40,7 +40,7 @@ class PolygonDrawerApp:
 
         # Menu suspenso para seleção do polígono
         self.shape_var = tk.StringVar(value='Triangulo 1')
-        shapes = ['Triangulo 1', 'Triangulo 2', 'Quadrado 1', 'Quadrado 2', 'Hexagono 1', 'Hexagon 2']
+        shapes = ['Triangulo 1', 'Triangulo 2', 'Quadrado 1', 'Quadrado 2', 'Hexagono 1', 'Hexagono 2']
         shape_menu = ttk.Combobox(self.control_frame, textvariable=self.shape_var, values=shapes)
         shape_menu.grid(row=0, column=1, padx=5, pady=5)
 
@@ -81,8 +81,12 @@ class PolygonDrawerApp:
         self.ax1.set_ylabel(f'Y (0 to {height})')
         self.ax1.axis('on')
         
+        # Adiciona o grid
+        self.ax1.grid(True, which='both', linestyle='--', linewidth=0.5, color='gray')
+        
         # Atualiza o canvas para exibir a nova imagem
         self.canvas.draw()
+
 
 if __name__ == "__main__":
     root = tk.Tk()

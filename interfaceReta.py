@@ -7,7 +7,7 @@ from src.Lines import plot_rasterized_image
 class LineDrawerApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("Interface de Rasterização de Segmentos de Reta")
+        self.root.title("Rasterização de Segmentos de Reta")
         
         # Resolução padrão
         self.resolutions = {

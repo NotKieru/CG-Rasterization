@@ -62,19 +62,19 @@ def generate_triangle(rotation=0):
     :param rotation: Ângulo de rotação em graus
     :return: Vértices do triângulo rotacionado
     """
-    # Vértices do triângulo equilátero
+    # Define os vértices do triângulo equilátero no sistema de coordenadas original
     vertices = [
-        (0, np.sqrt(3)/3),  # Vértice superior
+        (0, np.sqrt(3)/3),  # Vértice superior do triângulo
         (-0.5, -np.sqrt(3)/6),  # Vértice inferior esquerdo
         (0.5, -np.sqrt(3)/6)  # Vértice inferior direito
     ]
     
-    # Converte a rotação para radianos
+    # Converte o ângulo de rotação de graus para radianos
     angle_rad = np.deg2rad(rotation)
-    cos_angle = np.cos(angle_rad)
-    sin_angle = np.sin(angle_rad)
+    cos_angle = np.cos(angle_rad)  # Cálculo do cosseno do ângulo de rotação
+    sin_angle = np.sin(angle_rad)  # Cálculo do seno do ângulo de rotação
     
-    # Aplica a rotação
+    # Aplica a rotação aos vértices usando a matriz de rotação
     rotated_vertices = [
         (x * cos_angle - y * sin_angle, x * sin_angle + y * cos_angle)
         for x, y in vertices
@@ -89,20 +89,20 @@ def generate_square(rotation=0):
     :param rotation: Ângulo de rotação em graus
     :return: Vértices do quadrado rotacionado
     """
-    # Converte a rotação para radianos
-    angle_rad = np.deg2rad(rotation)
-    cos_angle = np.cos(angle_rad)
-    sin_angle = np.sin(angle_rad)
-    
-    # Vértices do quadrado
+    # Define os vértices do quadrado no sistema de coordenadas original
     vertices = [
-        (-0.5, -0.5),
-        (0.5, -0.5),
-        (0.5, 0.5),
-        (-0.5, 0.5)
+        (-0.5, -0.5),  # Vértice inferior esquerdo
+        (0.5, -0.5),   # Vértice inferior direito
+        (0.5, 0.5),    # Vértice superior direito
+        (-0.5, 0.5)    # Vértice superior esquerdo
     ]
     
-    # Aplica a rotação
+    # Converte o ângulo de rotação de graus para radianos
+    angle_rad = np.deg2rad(rotation)
+    cos_angle = np.cos(angle_rad)  # Cálculo do cosseno do ângulo de rotação
+    sin_angle = np.sin(angle_rad)  # Cálculo do seno do ângulo de rotação
+    
+    # Aplica a rotação aos vértices usando a matriz de rotação
     rotated_vertices = [
         (x * cos_angle - y * sin_angle, x * sin_angle + y * cos_angle)
         for x, y in vertices
@@ -117,18 +117,22 @@ def generate_hexagon(rotation=0):
     :param rotation: Ângulo de rotação em graus
     :return: Vértices do hexágono rotacionado
     """
-    # Converte a rotação para radianos
-    angle_rad = np.deg2rad(rotation)
-    cos_angle = np.cos(angle_rad)
-    sin_angle = np.sin(angle_rad)
-    
-    # Vértices do hexágono
+    # Define os vértices do hexágono regular no sistema de coordenadas original
     vertices = [
-        (np.cos(np.deg2rad(60 * i)), np.sin(np.deg2rad(60 * i)))
-        for i in range(6)
+        (1, 0),                    # Vértice 1: ponto no eixo x positivo
+        (0.5, np.sqrt(3) / 2),  # Vértice 2: ponto a 60 graus do eixo x
+        (-0.5, np.sqrt(3) / 2), # Vértice 3: ponto a 120 graus do eixo x
+        (-1, 0),                  # Vértice 4: ponto no eixo x negativo
+        (-0.5, -np.sqrt(3) / 2), # Vértice 5: ponto a 240 graus do eixo x
+        (0.5, -np.sqrt(3) / 2)   # Vértice 6: ponto a 300 graus do eixo x
     ]
     
-    # Aplica a rotação
+    # Converte o ângulo de rotação de graus para radianos
+    angle_rad = np.deg2rad(rotation)
+    cos_angle = np.cos(angle_rad)  # Cálculo do cosseno do ângulo de rotação
+    sin_angle = np.sin(angle_rad)  # Cálculo do seno do ângulo de rotação
+    
+    # Aplica a rotação aos vértices usando a matriz de rotação
     rotated_vertices = [
         (x * cos_angle - y * sin_angle, x * sin_angle + y * cos_angle)
         for x, y in vertices

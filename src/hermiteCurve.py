@@ -146,7 +146,7 @@ class HermiteCurve:
         :param resolution: Resolução da imagem (largura, altura).
         :param ax1: Eixo do matplotlib onde a curva será plotada.
         """
-        num_points = num_segments * 10 + 1  # Aumentar a densidade dos pontos para melhor visualização
+        num_points = num_segments
 
         if len(self.points) < 2:
             print("Número insuficiente de pontos para gerar a curva.")
@@ -175,9 +175,15 @@ class HermiteCurve:
 
         # Exibe a imagem rasterizada usando matplotlib
         ax1.clear()
-        ax1.imshow(combined_image, cmap='gray', origin='lower')
+        ax1.imshow(combined_image, cmap='gray', origin='lower', extent=[0, width, 0, height])
         ax1.set_title("Rasterized Image")
         ax1.set_xlim(0, width)
         ax1.set_ylim(0, height)
         ax1.set_aspect('equal', adjustable='box')
         ax1.grid(True)
+
+        # Ajusta o layout da figura
+        ax1.figure.tight_layout()
+        # Ajusta margens e espaçamento
+        ax1.figure.subplots_adjust(top=0.95, bottom=0.05, left=0.05, right=0.95)
+
