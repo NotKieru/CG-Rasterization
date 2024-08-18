@@ -3,7 +3,7 @@
 Instituto Federal do Ceará - Campus Fortaleza  
 Departamento de Telemática  
 Curso: Engenharia da Computação  
-Disciplina: Computação Gráfica  
+Disciplina: Computação Gráfica 2024.1
 
 ## Objetivo
 
@@ -68,9 +68,9 @@ Módulo personalizado que inclui funções para rasterização de polígonos, co
 
 Módulo personalizado que contém a função de rasterização de linhas, conforme descrito na subseção 5.2.1 do livro. Este módulo é responsável por rasterizar segmentos de reta e lidar com diferentes casos de inclinação e resolução.
 
-1. **Clone o Repositório**
+1. **Instruções para rodar este projeto**
 
-   Clone este repositório para o seu ambiente local usando o comando:
+   
 
    ```bash
    clone este projeto
