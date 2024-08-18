@@ -140,7 +140,7 @@ def get_polygon_vertices(shape, rotation=0):
     """
     Retorna os vértices do polígono com base na forma e rotação.
     
-    :param shape: Tipo de forma do polígono ('Triangle', 'Square', 'Hexagon')
+    :param shape: Tipo de forma do polígono ('Trianuglo', 'Quadrado', 'Hexagono')
     :param rotation: Ângulo de rotação em graus
     :return: Vértices do polígono rotacionado
     """
@@ -163,7 +163,7 @@ def plot_polygon(shape, rotation=0, width=100, height=100):
     """
     Plota o polígono com a rotação especificada.
     
-    :param shape: Tipo de forma do polígono ('Triangle', 'Square', 'Hexagon')
+    :param shape: Tipo de forma do polígono 
     :param rotation: Ângulo de rotação em graus
     :param width: Largura da imagem
     :param height: Altura da imagem

@@ -7,7 +7,7 @@ from src.hermiteCurve import Point, HermiteCurve
 class HermiteCurveApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("Hermite Curve")
+        self.root.title("Curva de Hermite")
 
         # Configura a figura e os eixos para gráficos
         self.figure, (self.ax1) = plt.subplots(1, figsize=(12, 6))
@@ -25,28 +25,28 @@ class HermiteCurveApp:
         self.control_frame.pack(side=tk.BOTTOM, fill=tk.X)
 
         # Layout para entrada de pontos e tangentes
-        self.point_frame = tk.LabelFrame(self.control_frame, text="Points and Tangents", padx=10, pady=10)
+        self.point_frame = tk.LabelFrame(self.control_frame, text="Pontos e Tangentes", padx=10, pady=10)
         self.point_frame.grid(row=0, column=0, columnspan=4, padx=10, pady=10)
 
         # Adiciona entradas iniciais
         self.add_entry_row()
 
-        tk.Button(self.control_frame, text="Add Point/Tangent", command=self.add_entry_row).grid(row=1, column=0, columnspan=4, pady=5)
+        tk.Button(self.control_frame, text="Adicionar Pontos/Tangentes", command=self.add_entry_row).grid(row=1, column=0, columnspan=4, pady=5)
 
         # Resolução
-        tk.Label(self.control_frame, text="Resolution").grid(row=2, column=0, padx=10, pady=5)
+        tk.Label(self.control_frame, text="Resolução").grid(row=2, column=0, padx=10, pady=5)
         self.resolution_var = tk.StringVar(value="100x100")
         resolutions = ["100x100", "300x300", "800x600", "1920x1080"]
         resolution_menu = ttk.Combobox(self.control_frame, textvariable=self.resolution_var, values=resolutions)
         resolution_menu.grid(row=2, column=1, padx=5, pady=5)
 
         # Quantidade de segmentos
-        tk.Label(self.control_frame, text="Number of Segments").grid(row=2, column=2, padx=10, pady=5)
+        tk.Label(self.control_frame, text="Número de segmentos").grid(row=2, column=2, padx=10, pady=5)
         self.num_segments_var = tk.IntVar(value=3)
         tk.Spinbox(self.control_frame, from_=1, to_=100, textvariable=self.num_segments_var).grid(row=2, column=3, padx=5, pady=5)
 
         # Botão para plotar a curva
-        tk.Button(self.control_frame, text="Plot Curve", command=self.plot_curve).grid(row=3, column=0, columnspan=4, pady=10)
+        tk.Button(self.control_frame, text="Plot Curva", command=self.plot_curve).grid(row=3, column=0, columnspan=4, pady=10)
 
     def add_entry_row(self):
         row_count = len(self.point_entries)
@@ -54,7 +54,7 @@ class HermiteCurveApp:
         # Adiciona linha para pontos
         x_entry = tk.Entry(self.point_frame, width=10)
         y_entry = tk.Entry(self.point_frame, width=10)
-        tk.Label(self.point_frame, text=f"Point {row_count + 1} (x, y)").grid(row=row_count, column=0, padx=5, pady=5)
+        tk.Label(self.point_frame, text=f"Ponto {row_count + 1} (x, y)").grid(row=row_count, column=0, padx=5, pady=5)
         x_entry.grid(row=row_count, column=1, padx=5, pady=5)
         y_entry.grid(row=row_count, column=2, padx=5, pady=5)
         self.point_entries.append((x_entry, y_entry))
@@ -62,7 +62,7 @@ class HermiteCurveApp:
         # Adiciona linha para tangentes
         x_entry_t = tk.Entry(self.point_frame, width=10)
         y_entry_t = tk.Entry(self.point_frame, width=10)
-        tk.Label(self.point_frame, text=f"Tangent {row_count + 1} (x, y)").grid(row=row_count, column=3, padx=5, pady=5)
+        tk.Label(self.point_frame, text=f"Tangente {row_count + 1} (x, y)").grid(row=row_count, column=3, padx=5, pady=5)
         x_entry_t.grid(row=row_count, column=4, padx=5, pady=5)
         y_entry_t.grid(row=row_count, column=5, padx=5, pady=5)
         self.tangent_entries.append((x_entry_t, y_entry_t))
