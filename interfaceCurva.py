@@ -2,20 +2,20 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
-from src.hermiteCurve import Ponto, CurvaHermite
+from src.hermiteCurve import Point, HermiteCurve
 
 class HermiteCurveApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("Curva de Hermite")
+        self.root.title("Hermite Curve")
 
-        # Configuração da figura e eixos para gráficos
+        # Configura a figura e os eixos para gráficos
         self.figure, (self.ax1) = plt.subplots(1, figsize=(12, 6))
         self.canvas = FigureCanvasTkAgg(self.figure, master=self.root)
         self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
 
-        self.pontos_entries = []
-        self.tangentes_entries = []
+        self.point_entries = []
+        self.tangent_entries = []
 
         self.create_widgets()
         self.update_plots()
@@ -24,82 +24,90 @@ class HermiteCurveApp:
         self.control_frame = ttk.Frame(self.root)
         self.control_frame.pack(side=tk.BOTTOM, fill=tk.X)
 
-        # Layout de entrada para pontos e tangentes
-        self.ponto_frame = tk.LabelFrame(self.control_frame, text="Pontos e Tangentes", padx=10, pady=10)
-        self.ponto_frame.grid(row=0, column=0, columnspan=4, padx=10, pady=10)
+        # Layout para entrada de pontos e tangentes
+        self.point_frame = tk.LabelFrame(self.control_frame, text="Points and Tangents", padx=10, pady=10)
+        self.point_frame.grid(row=0, column=0, columnspan=4, padx=10, pady=10)
 
-        # Adicionar entradas iniciais
+        # Adiciona entradas iniciais
         self.add_entry_row()
 
-        tk.Button(self.control_frame, text="Adicionar Ponto/Tangente", command=self.add_entry_row).grid(row=1, column=0, columnspan=4, pady=5)
+        tk.Button(self.control_frame, text="Add Point/Tangent", command=self.add_entry_row).grid(row=1, column=0, columnspan=4, pady=5)
 
         # Resolução
-        tk.Label(self.control_frame, text="Resolução").grid(row=2, column=0, padx=10, pady=5)
+        tk.Label(self.control_frame, text="Resolution").grid(row=2, column=0, padx=10, pady=5)
         self.resolution_var = tk.StringVar(value="100x100")
         resolutions = ["100x100", "300x300", "800x600", "1920x1080"]
         resolution_menu = ttk.Combobox(self.control_frame, textvariable=self.resolution_var, values=resolutions)
         resolution_menu.grid(row=2, column=1, padx=5, pady=5)
 
         # Quantidade de segmentos
-        tk.Label(self.control_frame, text="Quantidade de Segmentos").grid(row=2, column=2, padx=10, pady=5)
+        tk.Label(self.control_frame, text="Number of Segments").grid(row=2, column=2, padx=10, pady=5)
         self.num_segments_var = tk.IntVar(value=3)
         tk.Spinbox(self.control_frame, from_=1, to_=100, textvariable=self.num_segments_var).grid(row=2, column=3, padx=5, pady=5)
 
-        # Botão de Plotar
-        tk.Button(self.control_frame, text="Plotar Curva", command=self.plotar_curva).grid(row=3, column=0, columnspan=4, pady=10)
+        # Botão para plotar a curva
+        tk.Button(self.control_frame, text="Plot Curve", command=self.plot_curve).grid(row=3, column=0, columnspan=4, pady=10)
 
     def add_entry_row(self):
-        row_count = len(self.pontos_entries)
+        row_count = len(self.point_entries)
 
-        # Adicionar linha para pontos
-        x_entry = tk.Entry(self.ponto_frame, width=10)
-        y_entry = tk.Entry(self.ponto_frame, width=10)
-        tk.Label(self.ponto_frame, text=f"Ponto {row_count + 1} (x, y)").grid(row=row_count, column=0, padx=5, pady=5)
+        # Adiciona linha para pontos
+        x_entry = tk.Entry(self.point_frame, width=10)
+        y_entry = tk.Entry(self.point_frame, width=10)
+        tk.Label(self.point_frame, text=f"Point {row_count + 1} (x, y)").grid(row=row_count, column=0, padx=5, pady=5)
         x_entry.grid(row=row_count, column=1, padx=5, pady=5)
         y_entry.grid(row=row_count, column=2, padx=5, pady=5)
-        self.pontos_entries.append((x_entry, y_entry))
+        self.point_entries.append((x_entry, y_entry))
 
-        # Adicionar linha para tangentes
-        x_entry_t = tk.Entry(self.ponto_frame, width=10)
-        y_entry_t = tk.Entry(self.ponto_frame, width=10)
-        tk.Label(self.ponto_frame, text=f"Tangente {row_count + 1} (x, y)").grid(row=row_count, column=3, padx=5, pady=5)
+        # Adiciona linha para tangentes
+        x_entry_t = tk.Entry(self.point_frame, width=10)
+        y_entry_t = tk.Entry(self.point_frame, width=10)
+        tk.Label(self.point_frame, text=f"Tangent {row_count + 1} (x, y)").grid(row=row_count, column=3, padx=5, pady=5)
         x_entry_t.grid(row=row_count, column=4, padx=5, pady=5)
         y_entry_t.grid(row=row_count, column=5, padx=5, pady=5)
-        self.tangentes_entries.append((x_entry_t, y_entry_t))
+        self.tangent_entries.append((x_entry_t, y_entry_t))
 
-    def validar_entrada(self):
-        pontos = []
-        tangentes = []
+    def validate_input(self):
+        """
+        Valida a entrada dos pontos e tangentes. Verifica se os valores estão no intervalo [-1, 1].
+        
+        :return: Tuple contendo listas de pontos e tangentes ou (None, None) em caso de erro.
+        """
+        points = []
+        tangents = []
 
         try:
-            for (x_entry, y_entry) in self.pontos_entries:
+            for (x_entry, y_entry) in self.point_entries:
                 x = x_entry.get().strip()
                 y = y_entry.get().strip()
                 if x and y:
                     x = float(x)
                     y = float(y)
                     if not (-1 <= x <= 1 and -1 <= y <= 1):
-                        raise ValueError(f"Os valores devem estar no intervalo [-1, 1].")
-                    pontos.append(Ponto(x, y))
+                        raise ValueError("Os valores devem estar no intervalo [-1, 1].")
+                    points.append(Point(x, y))
 
-            for (x_entry, y_entry) in self.tangentes_entries:
+            for (x_entry, y_entry) in self.tangent_entries:
                 x = x_entry.get().strip()
                 y = y_entry.get().strip()
                 if x and y:
                     x = float(x)
                     y = float(y)
                     if not (-1 <= x <= 1 and -1 <= y <= 1):
-                        raise ValueError(f"Os valores devem estar no intervalo [-1, 1].")
-                    tangentes.append(Ponto(x, y))
+                        raise ValueError("Os valores devem estar no intervalo [-1, 1].")
+                    tangents.append(Point(x, y))
 
-            return pontos, tangentes
+            return points, tangents
         except ValueError as e:
-            messagebox.showerror("Erro", f"Dados inválidos: {e}")
+            messagebox.showerror("Error", f"Invalid data: {e}")
             return None, None
 
-    def plotar_curva(self):
-        pontos, tangentes = self.validar_entrada()
-        if pontos is None or tangentes is None:
+    def plot_curve(self):
+        """
+        Plota a curva de Hermite com base na entrada do usuário.
+        """
+        points, tangents = self.validate_input()
+        if points is None or tangents is None:
             return
 
         try:
@@ -107,14 +115,17 @@ class HermiteCurveApp:
             resolution = tuple(map(int, resolution_str.split("x")))
             num_segments = self.num_segments_var.get()
 
-            curva = CurvaHermite(pontos, tangentes)
+            curve = HermiteCurve(points, tangents)
             self.ax1.clear()
-            curva.plotar_curva(num_segments=num_segments, resolution=resolution, ax1=self.ax1)
+            curve.plot_curve(num_segments=num_segments, resolution=resolution, ax1=self.ax1)
             self.canvas.draw()
         except ValueError as e:
-            messagebox.showerror("Erro", f"Dados inválidos: {e}")
+            messagebox.showerror("Error", f"Invalid data: {e}")
 
     def update_plots(self):
+        """
+        Atualiza os gráficos na interface.
+        """
         self.ax1.clear()
         self.canvas.draw()
 
